@@ -206,10 +206,10 @@ def add_desc(file, array):
 
 def add_pics():
     try:
-        with open("tier1pics.txt") as p:
+        with open("txt/tier1pics.txt") as p:
             for i in range(7):
                 pic = p.readline().strip()
-                t1_array[i].pic = str(pic)
+                t1_array[i].pic = "images/" + str(pic)
     except FileNotFoundError:
         print("File not found")
 
@@ -255,7 +255,7 @@ def check_playstyles(player, pstyle_choice):
 def make_attribute_dict():
     attribute_dict = {}
     try:
-        with open("attributes.txt") as f:
+        with open("txt/attributes.txt") as f:
             for line in f:
                 clean_line = line.strip()
                 if not clean_line: continue  # Skip empty lines
@@ -293,10 +293,10 @@ def reset():
     st.session_state.min_a_choice = "F"
 
 #MAIN STARTS HERE
-load("tier1.txt", t1_array)
-load("test.txt", player_array)
-add_desc("tier1desc.txt",t1_array)
-add_desc("players_desc.txt", player_array)
+load("txt/tier1.txt", t1_array)
+load("txt/players.txt", player_array)
+add_desc("txt/tier1desc.txt",t1_array)
+add_desc("txt/players_desc.txt", player_array)
 option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Tier 1 Players", "Search Players", "Compare Players", "Teams"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
@@ -313,7 +313,7 @@ if st.sidebar.button("***:rainbow[Send stars!]***"):
 
 col_logo, col_blank = st.columns(2)
 with col_logo:
-    st.image("Logo.png")
+    st.image("images/Logo.png")
 if option == "Home":
     st.title("**:orange[Favourites]** *:red[&]* ***:blue[Future]***")
     st.write("Welcome to the draft website - Please use the sidebar to navigate to different features.")
