@@ -1,0 +1,7 @@
+Victor Wembanyama, 99, C, PF, 2023, 7'4", 235, S, A, A+, A-, S, A-, S, B+,
+02-03 Kobe Bryant, 99, SG, SF, ALL-TIME, 6'6", 200, S, S, A, A+, C+, S, B-, A+,
+99-00 Shaquille O'Neal, 99, C, , ALL-TIME, 7'1", 325, S, F, F, C+, S, C-, S, S,
+Grant Hill, 99, PG, PF, MyTEAM, 6'8", 225, S, A, A-, S, B, A+, B+, S,
+Kawhi Leonard, 98, SF, PF, CURRENT, 6'7", 225, A+, S, A+, A, A-, S, C+, A,
+21-22 Stephen Curry, 98, PG, SG, ALL-TIME, 6'2", 185, A+, S, S, A+, D, A-, C, B,
+Anthony Edwards, 98, SG, SF, 2020 , 6'4", 225, S, A+, S, A, C+, A+, C+, A+,

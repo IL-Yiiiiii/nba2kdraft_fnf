@@ -1,0 +1,8 @@
+Inside Scoring, ins
+Mid-Range Shooting, mid
+3-Point Shooting, three
+Playmaking, plk
+Interior Defense, itd
+Perimeter Defense, prd
+Rebounding, reb
+Athleticism, ath
