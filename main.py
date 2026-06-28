@@ -9,7 +9,7 @@ if "compare_df" not in st.session_state:
     st.session_state.compare_df = pd.DataFrame()
 
 class Player:
-    def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath):
+    def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
         self.name = name
         self.rating = rating
         self.primary_pos = primary_pos
@@ -27,15 +27,15 @@ class Player:
         self.prd = prd
         self.reb = reb
         self.ath = ath
-        self.ppg = -1
-        self.rpg = -1
-        self.apg = -1
-        self.mpg = -1
-        self.spg = -1
-        self.bpg = -1
-        self.fgp = -1
-        self.three_p = -1
-        self.ftp = -1
+        self.ppg = ppg
+        self.rpg = rpg
+        self.apg = apg
+        self.mpg = mpg
+        self.spg = spg
+        self.bpg = bpg
+        self.fgp = fgp
+        self.three_p = three_p
+        self.ftp = ftp
         self.compare = False
 
     def clone(self):
@@ -56,7 +56,7 @@ class Player:
         "Weight":      self.wt,
         "Inside Scoring":     self.ins,
         "Mid Range Shooting":     self.mid,
-        "3PT Shooting":   self.three,
+        "3PT Shooting":    self.three,
         "Playmaking":     self.plk,
         "Interior Defense":     self.itd,
         "Perimeter Defense":     self.prd,
@@ -80,7 +80,7 @@ def load(file, array):
                 clean_line = line.strip()
                 if not clean_line: continue  # Skip empty lines
                 parts = clean_line.split(",")
-                if len(parts) == 16:
+                if len(parts) == 24:
                     n = parts[0].strip()
                     r = parts[1].strip()
                     pp = parts[2].strip()
@@ -96,7 +96,18 @@ def load(file, array):
                     itd  = parts[12].strip()
                     reb = parts[13].strip()
                     ath = parts[14].strip()
-                array.append(Player(n, r, pp, sp, se, ht, wt, ins, mid, three, plk, pd, itd, reb, ath))
+                    ppg = parts[15].strip()
+                    rpg = parts[16].strip()
+                    apg = parts[17].strip()
+                    mpg = parts[18].strip()
+                    spg = parts[19].strip()
+                    bpg = parts[20].strip()
+                    fgp = parts[21].strip()
+                    thp = parts[22].strip()
+                    ftp = parts[23].strip()
+                    array.append(
+                        Player(n, r, pp, sp, se, ht, wt, ins, mid, three, plk, pd, itd, reb, ath, ppg, rpg, apg, mpg,
+                               spg, bpg, fgp, thp, ftp))
     except FileNotFoundError:
         print("File not found")
 
@@ -164,8 +175,8 @@ def display_player(player):
             st.write(f"**Mid-Range Shooting: {colour_grade(player.mid)}**")
             st.write(f"**3PT Shooting: {colour_grade(player.three)}**")
             st.write(f"**Playmaking: {colour_grade(player.plk)}**")
-            st.write(f"**Interior Defense: {colour_grade(player.itd)}**")
             st.write(f"**Perimeter Defense: {colour_grade(player.prd)}**")
+            st.write(f"**Interior Defense: {colour_grade(player.itd)}**")
             st.write(f"**Rebounding: {colour_grade(player.reb)}**")
             st.write(f"**Athleticism: {colour_grade(player.ath)}**")
         with col_gap2:
@@ -204,12 +215,12 @@ def add_desc(file, array):
     except FileNotFoundError:
         print("File not found")
 
-def add_pics():
+def add_pics(filename, array):
     try:
-        with open("txt/tier1pics.txt") as p:
-            for i in range(7):
+        with open(filename) as p:
+            for i in range(len(array)):
                 pic = p.readline().strip()
-                t1_array[i].pic = "images/" + str(pic)
+                array[i].pic = "images/" + str(pic)
     except FileNotFoundError:
         print("File not found")
 
@@ -238,7 +249,22 @@ def check_playstyles(player, pstyle_choice):
         return True
     playstyles = player.desc
     parts = playstyles.split(",")
-    if len(parts) == 3:
+    if len(parts) == 5:
+        pstyle1 = parts[0].strip()
+        pstyle2 = parts[1].strip()
+        pstyle3 = parts[2].strip()
+        pstyle4 = parts[3].strip()
+        pstyle5 = parts[4].strip()
+        if pstyle1 == pstyle_choice or pstyle2 == pstyle_choice or pstyle3 == pstyle_choice or pstyle4 == pstyle_choice or pstyle5 == pstyle_choice:
+            return True
+    elif len(parts) == 4:
+        pstyle1 = parts[0].strip()
+        pstyle2 = parts[1].strip()
+        pstyle3 = parts[2].strip()
+        pstyle4 = parts[3].strip()
+        if pstyle1 == pstyle_choice or pstyle2 == pstyle_choice or pstyle3 == pstyle_choice or pstyle4 == pstyle_choice:
+            return True
+    elif len(parts) == 3:
         pstyle1 = parts[0].strip()
         pstyle2 = parts[1].strip()
         pstyle3 = parts[2].strip()
@@ -297,7 +323,7 @@ load("txt/tier1.txt", t1_array)
 load("txt/players.txt", player_array)
 add_desc("txt/tier1desc.txt",t1_array)
 add_desc("txt/players_desc.txt", player_array)
-option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Tier 1 Players", "Search Players", "Compare Players", "Teams"])
+option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Teams"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
 if st.sidebar.button("***:rainbow[Send stars!]***"):
@@ -317,25 +343,29 @@ with col_logo:
 if option == "Home":
     st.title("**:orange[Favourites]** *:red[&]* ***:blue[Future]***")
     st.write("Welcome to the draft website - Please use the sidebar to navigate to different features.")
-    st.subheader("Your name: ")
-    st.subheader("Your pick position: " )
-    st.button("Trade pick position")
-    st.subheader("Current Round/Pick: ")
-    st.subheader("Your team: ")
-    st.write("[Placeholder for team display]")
-    st.button("Go to team")
+    st.subheader("This page is under construction!")
+    #st.subheader("Your name: ")
+    #st.subheader("Your pick position: " )
+    #st.button("Trade pick position")
+    #st.subheader("Current Round/Pick: ")
+    #st.subheader("Your team: ")
+    #st.write("[Placeholder for team display]")
+    #st.button("Go to team")
 
 elif option == "Guide":
-    st.title("GUIDE:")
-    st.subheader("About the players:")
-    st.write("Players in sets 2020-2026 have their ratings based on potential.")
-    st.write("MyTEAM Players have been adjusted to not be absolutely busted.")
+    st.title("***GUIDE***")
+    st.subheader("Superteams:")
+    st.write("Celtics: Tatum + Giannis")
+    st.write("Thunder: Shai + KD")
+    st.write("Knicks: Brunson + Booker")
+    st.write("Nuggets: Mitchell + Jokic")
+    st.write("Wizards: Doncic + AD")
     st.subheader("If rotations are automated:")
     st.write("Playoffs: 8 Man Rotation, Time towards bench - 35")
     st.write("Regular Season: 9 Man Rotation, Time towards bench - 50")
     st.subheader("Attribute and stat information:")
     st.write("***Stats included are from the regular season (rounded), all per game***: Points, Rebounds, Assists, Minutes, Steals, Blocks, Field Goal %, 3 Point %, Free Throw %")
-    st.write(f"The grade **:violet[S]** indicates the attribute is in the range 95-99.")
+    st.write(f"The grade **:violet[S]** indicates that the player is top 3 for that attribute (out of players in the draft).")
     st.write("The rest of the grades are whatever 2K gives the player.")
     st.subheader("What is each attribute?")
     st.write("***Inside Scoring:*** **How well the player scores close to the basket; includes dunks, layups and post moves.**")
@@ -347,29 +377,40 @@ elif option == "Guide":
     st.write("***Rebounding:*** **How well the player grabs missed shots on both ends.**")
     st.write("***Athleticism:*** **How physically gifted the player is in terms of speed, leaping ability and explosiveness.**")
     st.subheader("What is each playstyle?")
-    st.write("***3-Level Scorer:*** **Can score at the rim, mid range and from three at a high level (A or above)**")
-    st.write("***Sharpshooter:*** **Elite perimeter(3PT) shooter, floor spacer**")
-    st.write("***Mid Range Assassin:*** **Elite pull up and mid range scorer**")
+    st.write("***3-Level Scorer:*** **Can score at the rim, mid range and from three at a high level (A- in all 3 types of scoring) **")
+    st.write("***Sharpshooter:*** **Elite perimeter(3PT) shooter, floor spacer (A+/S 3PT)**")
+    st.write("***Mid Range Assassin:*** **Elite pull up and mid range scorer (A+/S Mid Range)**")
     st.write("***Crafty Finisher:*** **Elite touch and skill finisher; floaters, layups, finishing through contact**")
     st.write("***Explosive Finisher:*** **Elite athlete who finishes above the rim**")
     st.write("***Paint Beast:*** **Dominant interior scorer and rebounder**")
-    st.write("***Stretch Big:*** **Big man who spaces the floor with shooting** (At least B+ in both defenses)")
-    st.write("***Defensive Anchor:*** **Elite rim protector and interior defender**")
-    st.write("***Perimeter Lockdown:*** **Elite on-ball perimeter defender**")
-    st.write("***Versatile Defender:*** **Can guard multiple positions** (At least A- in both defenses)")
+    st.write("***Stretch Big:*** **Big man who spaces the floor with shooting**")
+    st.write("***Defensive Anchor:*** **Elite rim protector and interior defender (A+/S Interior defense)**")
+    st.write("***Perimeter Lockdown:*** **Elite on-ball perimeter defender (90+ Perimeter defense)**")
+    st.write("***Versatile Defender:*** **Can guard multiple positions**")
     st.write("***Two Way:*** **Elite on both ends**")
-    st.write("***Two Way Unicorn:*** **UNIQUE two way talent at any position**")
     st.write("***Floor General:*** **Pass first orchestrator who controls tempo**")
     st.write("***Playmaking Maestro:*** **Scorer with elite secondary playmaking**")
     st.write("***Swiss Army Knife:*** **Does everything, no defined primary role**")
 
-elif option == "Tier 1 Players":
-    st.header("***Tier 1 Players:***")
-    add_pics()
+elif option == "Headliner Players":
+    add_pics("txt/tier1pics.txt", t1_array)
+    st.title("***HEADLINERS***")
+    st.subheader("***NOTE:***")
+    st.write("**The draft is in serpentine order - so in even rounds the 7th pick will go 1st, 6th go 2nd, and so on.**")
+    st.write("**Example:** Round 1: 1,2,3,4,5,6,7 | Round 2: 7,6,5,4,3,2,1")
+    st.write("*> Picking a 99 will get you a pick in the range* **4-7**.")
+    st.write("*> Picking a 98 will get you a pick in the range* **1-3**.")
+    st.write("Also: The efficiencies are more normal in the playoffs, for example, 3PT shooting % for mid shooters falls to mid 30 percentages")
+    st.header("***Players:***")
     display_t1()
 
 elif option == "Search Players":
-    st.header("*Player Search:*")
+    #add_pics("txt/playerspics.txt", player_array)
+    st.title("*PLAYER SEARCH*")
+    st.subheader("About the players:")
+    st.write("Players in sets 2020-2026 have their ratings based on their projected primes.")
+    st.write("Note: The efficiencies are more normal in the playoffs, for example, 3PT shooting % for mid shooters falls to mid 30 percentages")
+    st.write("Also: Players who took a low volume of 3s (that shouldn't have) due to system profiency get put at 0 3P%")
     col_pos, col_attribute = st.columns([6,8])
     with col_pos:
         playstyle_select = st.selectbox("Playstyle Filter:",
@@ -385,19 +426,19 @@ elif option == "Search Players":
         max_grade_select = st.select_slider("Max Attribute Grade:",["S", "A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"], key="max_a_choice")
         min_grade_select = st.select_slider("Min Attribute Grade:",["F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S"], key="min_a_choice")
     st.markdown("---")
-    st.subheader("*:green[UNDRAFTED:]*")
+    st.header("*:green[UNDRAFTED]*")
     for i in range(len(player_array)):
         if check_playstyles(player_array[i], playstyle_select) and check_attribute(player_array[i], attribute_select, min_grade_select, max_grade_select, make_attribute_dict()) and check_position(player_array[i], pos_filter, sec_allowed):
             display_player(player_array[i])
     st.markdown("---")
-    st.subheader("*:red[DRAFTED:]*")
+    st.header("*:red[DRAFTED]*")
 
 elif option == "Compare Players":
-    st.header("*Compare Players:*")
+    st.title("*COMPARE PLAYERS*")
+    st.subheader("*Click on a player in 'Search Players' and click compare player to add here:*")
     if st.button(":yellow[Reset compare]", key="reset_compare"):
         st.session_state.compare_array = []
         st.rerun()
-    st.subheader("*Click on a player and click compare player to add here:*")
     st.markdown("""
         <style>
             div[data-testid="column"] {
@@ -434,7 +475,8 @@ elif option == "Compare Players":
                     st.rerun()
 
     load_to_df(st.session_state.compare_array)
-    st.dataframe(st.session_state.compare_df.T, use_container_width=True)
+    st.dataframe(st.session_state.compare_df.T, width='stretch')
 
 elif option == "Teams":
-    st.header("*Teams:*")
+    st.title("*TEAMS*")
+    st.subheader("This page is under construction!")
