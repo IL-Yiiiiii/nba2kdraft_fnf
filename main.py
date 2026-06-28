@@ -354,7 +354,7 @@ if option == "Home":
 
 elif option == "Guide":
     st.title("***GUIDE***")
-    st.subheader("Superteams:")
+    st.subheader("Opposing Superteams (not really superteams they aren't that scary actually):")
     st.write("Celtics: Tatum + Giannis")
     st.write("Thunder: Shai + KD")
     st.write("Knicks: Brunson + Booker")
@@ -377,7 +377,7 @@ elif option == "Guide":
     st.write("***Rebounding:*** **How well the player grabs missed shots on both ends.**")
     st.write("***Athleticism:*** **How physically gifted the player is in terms of speed, leaping ability and explosiveness.**")
     st.subheader("What is each playstyle?")
-    st.write("***3-Level Scorer:*** **Can score at the rim, mid range and from three at a high level (A- in all 3 types of scoring) **")
+    st.write("***3-Level Scorer:*** **Can score at the rim, mid range and from three at a high level (A- in all 3 types of scoring)**")
     st.write("***Sharpshooter:*** **Elite perimeter(3PT) shooter, floor spacer (A+/S 3PT)**")
     st.write("***Mid Range Assassin:*** **Elite pull up and mid range scorer (A+/S Mid Range)**")
     st.write("***Crafty Finisher:*** **Elite touch and skill finisher; floaters, layups, finishing through contact**")
