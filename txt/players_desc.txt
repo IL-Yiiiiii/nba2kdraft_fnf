@@ -1,14 +1,56 @@
-Versatile Defender, 3-Level Scorer, Two Way
-Floor General, 3-Level Scorer, Two Way
-3-Level Scorer, Sharpshooter, Two Way
-3-Level Scorer, Perimeter Lockdown, Two Way
-Two Way, 3-Level Scorer, Stretch Big
+Versatile Defender, 3-Level Scorer, Two Way, Crafty Finisher, Perimeter Lockdown
+Floor General, 3-Level Scorer, Two Way, Crafty Finisher, Mid Range Assassin
+3-Level Scorer, Sharpshooter, Two-Way, Mid Range Assassin
+3-Level Scorer, Explosive Finisher, Two-Way, Mid Range Assassin
+Floor General, 3-Level Scorer, Crafty Finisher
 3-Level Scorer, Crafty Finisher, Playmaking Maestro
-3-Level Scorer, Explosive Finisher, Two Way
-Stretch Big, Paint Beast, 3-Level Scorer
-Floor General, 3-Level Scorer, Mid Range Assassin
-Defensive Anchor, Paint Beast, Explosive Finisher
-Paint Beast, 3-Level Scorer, Two Way
-Two Way, Stretch Big, Defensive Anchor
-3-Level Scorer, Crafty Finisher, Mid Range Assassin
-Explosive Finisher, Two Way, Defensive Anchor
+3-Level Scorer, Explosive Finisher, Two Way, Crafty Finisher
+Stretch Big, Paint Beast, 3-Level Scorer, Playmaking Maestro
+Explosive Finisher, Two Way, Defensive Anchor, Versatile Defender
+Two Way, Defensive Anchor, Paint Beast, Explosive Finisher
+3-Level Scorer, Crafty Finisher, Mid-Range Assassin, Playmaking Maestro
+Paint Beast, 3-Level Scorer, Two Way, Stretch Big
+Versatile Defender, Perimeter Lockdown, Two Way, Playmaking Maestro, Swiss Army Knife
+Crafty Finisher, Playmaking Maestro, Two Way, 3-Level Scorer, Perimeter Lockdown
+Two Way, Versatile Defender, Stretch Big, Crafty Finisher
+Crafty Finisher, Perimeter Lockdown, Playmaking Maestro, Two Way
+Two Way, Stretch Big, Defensive Anchor, Versatile Defender
+Explosive Finisher, Two Way, 3-Level Scorer
+Paint Beast, Playmaking Maestro, Swiss Army Knife, Crafty Finisher
+Two Way, Perimeter Lockdown, Versatile Defender, 3-Level Scorer
+Sharpshooter, 3-Level Scorer
+Sharpshooter,  3-Level Scorer, Playmaking Maestro
+Sharpshooter, 3-Level Scorer, Two Way
+Perimeter Lockdown, Explosive Finisher, Versatile Defender, Two Way
+Swiss Army Knife, Playmaking Maestro, Two Way
+Explosive Finisher, Playmaking Maestro, Swiss Army Knife
+Defensive Anchor, Paint Beast, Versatile Defender
+Two Way, Defensive Anchor, Versatile Defender
+Two Way, Defensive Anchor, Stretch Big
+Two Way, Perimeter Lockdown, Sharpshooter, Versatile Defender
+Two Way, Playmaking Maestro, Versatile Defender, Crafty Finisher
+Playmaking Maestro, 3-Level Scorer, Sharpshooter
+Floor General, Sharpshooter
+Sharpshooter, Playmaking Maestro, Crafty Finisher
+Paint Beast, Crafty Finisher, Playmaking Maestro
+3-Level Scorer, Playmaking Maestro, Two Way, Mid Range Assassin
+Swiss Army Knife, 3-Level Scorer, Two Way
+3-Level Scorer, Sharpshooter
+3-Level Scorer, Sharpshooter, Playmaking Maestro
+Defensive Anchor, Paint Beast
+Defensive Anchor, Paint Beast, Two Way
+Swiss Army Knife, 3-Level Scorer, Two Way
+Defensive Anchor, Playmaking Maestro, Crafty Finisher
+Perimeter Lockdown, Versatile Defender, Explosive Finisher
+Paint Beast, Playmaking Maestro
+Swiss Army Knife, Two Way, Versatile Defender
+Paint Beast, Two Way
+Explosive Finisher, 3-Level Scorer
+Playmaking Maestro, Sharpshooter, Mid Range Assassin
+Mid Range Assassin, Sharpshooter
+Paint Beast, Stretch Big
+3-Level Scorer, Crafty Finisher
+Sharpshooter, Versatile Defender
+3-Level Scorer, Versatile Defender
+3-Level Scorer, Explosive Finisher
+Mid Range Assassin, 3-Level Scorer
