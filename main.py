@@ -1,15 +1,5 @@
 import copy, streamlit as st, pandas as pd, time
 
-player_array = []
-drafted_player_array = []
-t1_array = []
-if "compare_array" not in st.session_state:
-    st.session_state.compare_array = []
-if "compare_df" not in st.session_state:
-    st.session_state.compare_df = pd.DataFrame()
-if "your_team_array" not in st.session_state:
-    st.session_state.your_team_array = []
-
 class Player:
     def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
         self.name = name
@@ -132,20 +122,30 @@ def display_player(player):
             st.subheader(f"Weight: *{player.wt}*")
             st.write("")
             st.write(player.desc)
-            if st.button("Compare Player", key=f"compare_button_{player.name}"):
-                already_added = any(p.name == player.name for p in st.session_state.compare_array)
-                if not already_added:
-                    added_confirm = True
-                    st.session_state.compare_array.append(player.clone())
-                else:
-                    added_already = True
-            if st.button("Draft Player", key=f"draft_button_{player.name}"):
-                already_drafted = any(p.name == player.name for p in st.session_state.your_team_array)
-                if not already_drafted:
-                    drafted_confirm = True
-                    st.session_state.your_team_array.append(player.clone())
-                else:
-                    drafted_already = True
+            col_compare, col_draft = st.columns([1,1])
+            with col_compare:
+                if st.button("Compare Player", key=f"compare_button_{player.name}"):
+                    already_added = any(p.name == player.name for p in st.session_state.compare_array)
+                    if not already_added:
+                        added_confirm = True
+                        st.session_state.compare_array.append(player.clone())
+                    else:
+                        added_already = True
+            with col_draft:
+                if st.button("Draft Player", key=f"draft_button_{player.name}"):
+                    already_drafted = any(p.name == player.name for p in st.session_state.your_team_array)
+                    if not already_drafted:
+                        if player in st.session_state.player_array:
+                            st.session_state.drafted_player_array.append(player.clone())
+                        elif player in st.session_state.t1_array:
+                            st.session_state.drafted_t1_array.append(player.clone())
+                        st.session_state.your_team_array.append(player.clone())
+                        st.session_state.player_array = [p for p in st.session_state.player_array if
+                                                         p.name != player.name]
+                        st.session_state.t1_array = [p for p in st.session_state.t1_array if p.name != player.name]
+                        drafted_confirm = True
+                    else:
+                        drafted_already = True
         if added_confirm:
             st.markdown(
                 f"""
@@ -154,6 +154,7 @@ def display_player(player):
                         {player.name} added to compare!</div>
                         """,
                 unsafe_allow_html=True)
+            st.toast(f"{player.name} added to compare!", icon="⚖️")
         elif added_already:
             st.markdown(
                 f"""
@@ -163,15 +164,7 @@ def display_player(player):
                     </div>
                     """,
                 unsafe_allow_html=True)
-        if drafted_confirm:
-            st.markdown(
-                f"""
-                        <div style='background-color: #213d25; padding: 10px; border-radius: 5px; 
-                        color: #68e27b; text-align: center; font-weight: italic;'>
-                        You have drafted {player.name}!</div>
-                        """,
-                unsafe_allow_html=True)
-        elif drafted_already:
+        if drafted_already:
             st.markdown(
                 f"""
                     <div style='background-color: #421f1f; padding: 10px; border-radius: 5px; 
@@ -180,6 +173,17 @@ def display_player(player):
                     </div>
                     """,
                 unsafe_allow_html=True)
+        elif drafted_confirm:
+            st.markdown(
+                f"""
+                        <div style='background-color: #213d25; padding: 10px; border-radius: 5px; 
+                        color: #68e27b; text-align: center; font-weight: italic;'>
+                        You have drafted {player.name}!</div>
+                        """,
+                unsafe_allow_html=True)
+            st.toast(f"You have drafted {player.name}!", icon="🤝")
+            time.sleep(4) 
+            st.rerun()
         st.markdown("---")
         col_gap1, col_ats_title, col_gap2, col_stats_title1 = st.columns([0.6, 5.3, 1, 8])
         with col_ats_title:
@@ -269,8 +273,8 @@ def colour_grade(grade):
     return new
 
 def display_t1():
-    for i in range(len(t1_array)):
-        display_player(t1_array[i])
+    for i in range(len(st.session_state.t1_array)):
+        display_player(st.session_state.t1_array[i])
 
 def check_playstyles(player, pstyle_choice):
     if pstyle_choice == "None":
@@ -347,11 +351,29 @@ def reset():
     st.session_state.min_a_choice = "F"
 
 #MAIN STARTS HERE
-load("txt/tier1.txt", t1_array)
-load("txt/players.txt", player_array)
-add_desc("txt/tier1desc.txt",t1_array)
-add_desc("txt/players_desc.txt", player_array)
-option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft", "Teams", "Trade Hub"])
+if "compare_array" not in st.session_state:
+    st.session_state.compare_array = []
+if "compare_df" not in st.session_state:
+    st.session_state.compare_df = pd.DataFrame()
+if "your_team_array" not in st.session_state:
+    st.session_state.your_team_array = []
+if "drafted_player_array" not in st.session_state:
+    st.session_state.drafted_player_array = []
+if "drafted_t1_array" not in st.session_state:
+    st.session_state.drafted_t1_array = []
+if "player_array" not in st.session_state:
+    temp_players = []
+    load("txt/players.txt", temp_players)
+    add_desc("txt/players_desc.txt", temp_players)
+    st.session_state.player_array = temp_players
+    add_pics("txt/playerspics.txt", st.session_state.player_array)
+if "t1_array" not in st.session_state:
+    temp_t1 = []
+    load("txt/tier1.txt", temp_t1)
+    add_desc("txt/tier1desc.txt", temp_t1)
+    st.session_state.t1_array = temp_t1
+    add_pics("txt/tier1pics.txt", st.session_state.t1_array)
+option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft", "Teams", "Trade Hub", "Results"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
 if st.sidebar.button("***:rainbow[Send snowflakes!]***"):
@@ -367,6 +389,9 @@ if st.sidebar.button("***:rainbow[Send stars!]***"):
         """,
         unsafe_allow_html=True
     )
+st.sidebar.write("------------")
+st.sidebar.write("Draft Date: **TBC**")
+st.sidebar.write("*Also credit to the NBA, Bleacher Report and others for photos please don't copyright me*")
 
 col_logo, col_blank = st.columns(2)
 with col_logo:
@@ -374,9 +399,13 @@ with col_logo:
 if option == "Home":
     st.title("**:orange[Favourites]** *:red[&]* ***:blue[Future]***")
     st.write("Welcome to the draft website - Please use the sidebar to navigate to different features.")
-    st.subheader("*UNDER CONSTRUCTION!*")
-    st.write("------------")
-    st.write("Also credit to the NBA, Bleacher Report and others for photos please don't copyright me")
+    st.subheader("Your name: ")
+    st.subheader("Your pick position: " )
+    st.button("Trade pick position")
+    st.subheader("Current Round/Pick: ")
+    st.subheader("Your team: ")
+    st.write("[Placeholder for team display]")
+    st.button("Go to team")
 
 elif option == "Guide":
     st.title("***GUIDE***")
@@ -419,7 +448,6 @@ elif option == "Guide":
     st.write("Wizards: Doncic + AD")
 
 elif option == "Headliner Players":
-    add_pics("txt/tier1pics.txt", t1_array)
     st.title("***HEADLINERS***")
     st.subheader("***NOTE:***")
     st.write("**The draft is in serpentine order - so in even rounds the 7th pick will go 1st, 6th go 2nd, and so on.**")
@@ -430,9 +458,11 @@ elif option == "Headliner Players":
     st.header("*:green[UNDRAFTED]*")
     display_t1()
     st.header("*:red[DRAFTED]*")
+    if st.session_state.drafted_t1_array:
+        for i in range(len(st.session_state.drafted_t1_array)):
+            display_player(st.session_state.drafted_t1_array[i])
 
 elif option == "Search Players":
-    add_pics("txt/playerspics.txt", player_array)
     st.title("*PLAYER SEARCH*")
     st.subheader("About the players:")
     st.write("Players in sets 2020-2026 have their ratings based on their projected primes.")
@@ -454,11 +484,14 @@ elif option == "Search Players":
         min_grade_select = st.select_slider("Min Attribute Grade:",["F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S"], key="min_a_choice")
     st.markdown("---")
     st.header("*:green[UNDRAFTED]*")
-    for i in range(len(player_array)):
-        if check_playstyles(player_array[i], playstyle_select) and check_attribute(player_array[i], attribute_select, min_grade_select, max_grade_select, make_attribute_dict()) and check_position(player_array[i], pos_filter, sec_allowed):
-            display_player(player_array[i])
+    for i in range(len(st.session_state.player_array)):
+        if check_playstyles(st.session_state.player_array[i], playstyle_select) and check_attribute(st.session_state.player_array[i], attribute_select, min_grade_select, max_grade_select, make_attribute_dict()) and check_position(st.session_state.player_array[i], pos_filter, sec_allowed):
+            display_player(st.session_state.player_array[i])
     st.markdown("---")
     st.header("*:red[DRAFTED]*")
+    if st.session_state.drafted_player_array:
+        for i in range(len(st.session_state.drafted_player_array)):
+            display_player(st.session_state.drafted_player_array[i])
 
 elif option == "Compare Players":
     st.title("*COMPARE PLAYERS*")
@@ -506,7 +539,6 @@ elif option == "Compare Players":
 
 elif option == "Draft":
     st.title("*DRAFT*")
-    st.subheader("*UNDER CONSTRUCTION!*")
 
 elif option == "Teams":
     st.title("*TEAMS*")
@@ -515,8 +547,29 @@ elif option == "Teams":
         for i in range(len(st.session_state.your_team_array)):
             display_player(st.session_state.your_team_array[i])
     st.subheader("*OTHER TEAMS:*")
-    st.subheader("*UNDER CONSTRUCTION!*")
+    st.write(f"[insert here]'s team")
+    st.write(f"[insert here]'s team")
+    st.write(f"[insert here]'s team")
+    st.write(f"[insert here]'s team")
+    st.write(f"[insert here]'s team")
+    st.write(f"[insert here]'s team")
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
-    st.subheader("*UNDER CONSTRUCTION!*")
+
+elif option == "Results":
+    st.title("*RESULTS*")
+    st.subheader("**< YEAR 1 >**")
+    st.write("*WAITING!*")
+    st.subheader("**< YEAR 2 >**")
+    st.write("*WAITING!*")
+    st.subheader("**< YEAR 3 >**")
+    st.write("*WAITING!*")
+    st.subheader("**< YEAR 4 >**")
+    st.write("*WAITING!*")
+    st.subheader("**< YEAR 5 >**")
+    st.write("*WAITING!*")
+    st.subheader("**< YEAR 6 >**")
+    st.write("*WAITING!*")
+    st.subheader("**< YEAR 7 >**")
+    st.write("*WAITING!*")
