@@ -1,4 +1,4 @@
-import copy, streamlit as st, pandas as pd
+import copy, streamlit as st, pandas as pd, time
 
 player_array = []
 drafted_player_array = []
@@ -7,6 +7,8 @@ if "compare_array" not in st.session_state:
     st.session_state.compare_array = []
 if "compare_df" not in st.session_state:
     st.session_state.compare_df = pd.DataFrame()
+if "your_team_array" not in st.session_state:
+    st.session_state.your_team_array = []
 
 class Player:
     def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
@@ -114,6 +116,8 @@ def load(file, array):
 def display_player(player):
     added_confirm = False
     added_already = False
+    drafted_confirm = False
+    drafted_already = False
     secondary = ""
     if player.secondary_pos != "":
         secondary = "/" + player.secondary_pos
@@ -135,11 +139,18 @@ def display_player(player):
                     st.session_state.compare_array.append(player.clone())
                 else:
                     added_already = True
+            if st.button("Draft Player", key=f"draft_button_{player.name}"):
+                already_drafted = any(p.name == player.name for p in st.session_state.your_team_array)
+                if not already_drafted:
+                    drafted_confirm = True
+                    st.session_state.your_team_array.append(player.clone())
+                else:
+                    drafted_already = True
         if added_confirm:
             st.markdown(
                 f"""
-                        <div style='background-color: #213d25; padding: 10px; border-radius: 5px; 
-                        color: #68e27b; text-align: center; font-weight: italic;'>
+                        <div style='background-color: #213d3b; padding: 10px; border-radius: 5px; 
+                        color: #8afffd; text-align: center; font-weight: italic;'>
                         {player.name} added to compare!</div>
                         """,
                 unsafe_allow_html=True)
@@ -149,6 +160,23 @@ def display_player(player):
                     <div style='background-color: #3d421f; padding: 10px; border-radius: 5px; 
                                 color: #ffff8a; text-align: center; font-weight: italic;'>
                      {player.name} already added to compare!
+                    </div>
+                    """,
+                unsafe_allow_html=True)
+        if drafted_confirm:
+            st.markdown(
+                f"""
+                        <div style='background-color: #213d25; padding: 10px; border-radius: 5px; 
+                        color: #68e27b; text-align: center; font-weight: italic;'>
+                        You have drafted {player.name}!</div>
+                        """,
+                unsafe_allow_html=True)
+        elif drafted_already:
+            st.markdown(
+                f"""
+                    <div style='background-color: #421f1f; padding: 10px; border-radius: 5px; 
+                                color: #ff8a8a; text-align: center; font-weight: italic;'>
+                     {player.name} has already been drafted!</div>
                     </div>
                     """,
                 unsafe_allow_html=True)
@@ -323,7 +351,7 @@ load("txt/tier1.txt", t1_array)
 load("txt/players.txt", player_array)
 add_desc("txt/tier1desc.txt",t1_array)
 add_desc("txt/players_desc.txt", player_array)
-option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Teams"])
+option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft", "Teams", "Trade Hub"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
 if st.sidebar.button("***:rainbow[Send snowflakes!]***"):
@@ -346,14 +374,13 @@ with col_logo:
 if option == "Home":
     st.title("**:orange[Favourites]** *:red[&]* ***:blue[Future]***")
     st.write("Welcome to the draft website - Please use the sidebar to navigate to different features.")
-    st.subheader("This page is under construction!")
-    #st.subheader("Your name: ")
-    #st.subheader("Your pick position: " )
-    #st.button("Trade pick position")
-    #st.subheader("Current Round/Pick: ")
-    #st.subheader("Your team: ")
-    #st.write("[Placeholder for team display]")
-    #st.button("Go to team")
+    st.subheader("Your name: ")
+    st.subheader("Your pick position: " )
+    st.button("Trade pick position")
+    st.subheader("Current Round/Pick: ")
+    st.subheader("Your team: ")
+    st.write("[Placeholder for team display]")
+    st.button("Go to team")
     st.write("------------")
     st.write("Also credit to the NBA, Bleacher Report and others for photos please don't copyright me")
 
@@ -406,8 +433,9 @@ elif option == "Headliner Players":
     st.write("*> Picking a 99 will get you a pick in the range* **4-7**.")
     st.write("*> Picking a 98 will get you a pick in the range* **1-3**.")
     st.write("Also: The efficiencies are more normal in the playoffs, for example, 3PT shooting % for mid shooters falls to mid 30 percentages")
-    st.header("***Players:***")
+    st.header("*:green[UNDRAFTED]*")
     display_t1()
+    st.header("*:red[DRAFTED]*")
 
 elif option == "Search Players":
     add_pics("txt/playerspics.txt", player_array)
@@ -482,6 +510,28 @@ elif option == "Compare Players":
     load_to_df(st.session_state.compare_array)
     st.dataframe(st.session_state.compare_df.T, width='stretch')
 
+elif option == "Draft":
+    st.title("*DRAFT*")
+
 elif option == "Teams":
     st.title("*TEAMS*")
-    st.subheader("This page is under construction!")
+    st.subheader("*YOUR TEAM:*")
+    if st.session_state.your_team_array:
+        for i in range(len(st.session_state.your_team_array)):
+            display_player(st.session_state.your_team_array[i])
+    st.subheader("*OTHER TEAMS:*")
+    st.write(f"[insert here]'s team")
+    st.dataframe(st.session_state.compare_df.T, width='stretch')
+    st.write(f"[insert here]'s team")
+    st.dataframe(st.session_state.compare_df.T, width='stretch')
+    st.write(f"[insert here]'s team")
+    st.dataframe(st.session_state.compare_df.T, width='stretch')
+    st.write(f"[insert here]'s team")
+    st.dataframe(st.session_state.compare_df.T, width='stretch')
+    st.write(f"[insert here]'s team")
+    st.dataframe(st.session_state.compare_df.T, width='stretch')
+    st.write(f"[insert here]'s team")
+    st.dataframe(st.session_state.compare_df.T, width='stretch')
+
+elif option == "Trade Hub":
+    st.title("*TRADE HUB*")
