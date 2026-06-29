@@ -399,13 +399,7 @@ with col_logo:
 if option == "Home":
     st.title("**:orange[Favourites]** *:red[&]* ***:blue[Future]***")
     st.write("Welcome to the draft website - Please use the sidebar to navigate to different features.")
-    st.subheader("Your name: ")
-    st.subheader("Your pick position: " )
-    st.button("Trade pick position")
-    st.subheader("Current Round/Pick: ")
-    st.subheader("Your team: ")
-    st.write("[Placeholder for team display]")
-    st.button("Go to team")
+    st.subheader("*UNDER CONSTRUCTION!*")
 
 elif option == "Guide":
     st.title("***GUIDE***")
@@ -539,6 +533,7 @@ elif option == "Compare Players":
 
 elif option == "Draft":
     st.title("*DRAFT*")
+    st.subheader("*UNDER CONSTRUCTION!*")
 
 elif option == "Teams":
     st.title("*TEAMS*")
@@ -547,15 +542,11 @@ elif option == "Teams":
         for i in range(len(st.session_state.your_team_array)):
             display_player(st.session_state.your_team_array[i])
     st.subheader("*OTHER TEAMS:*")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
+    st.subheader("*UNDER CONSTRUCTION!*")
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
+    st.subheader("*UNDER CONSTRUCTION!*")
 
 elif option == "Results":
     st.title("*RESULTS*")
