@@ -440,7 +440,7 @@ elif option == "Search Players":
 
 elif option == "Compare Players":
     st.title("*COMPARE PLAYERS*")
-    st.subheader("*Click on a player in 'Search Players' and click compare player to add here:*")
+    st.subheader("*Click on a player in 'Search Players' or 'Headliner Players' and click compare player to add here:*")
     if st.button(":yellow[Reset compare]", key="reset_compare"):
         st.session_state.compare_array = []
         st.rerun()
