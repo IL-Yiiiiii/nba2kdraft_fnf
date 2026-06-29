@@ -358,13 +358,6 @@ if option == "Home":
     st.write("Also credit to the NBA, Bleacher Report and others for photos please don't copyright me")
 
 elif option == "Guide":
-    st.title("***GUIDE***")
-    st.subheader("Opposing Superteams (not really superteams they aren't that scary actually):")
-    st.write("Celtics: Tatum + Giannis")
-    st.write("Thunder: Shai + KD")
-    st.write("Knicks: Brunson + Booker")
-    st.write("Nuggets: Mitchell + Jokic")
-    st.write("Wizards: Doncic + AD")
     st.subheader("If rotations are automated:")
     st.write("Playoffs: 8 Man Rotation, Time towards bench - 35")
     st.write("Regular Season: 9 Man Rotation, Time towards bench - 50")
@@ -396,6 +389,12 @@ elif option == "Guide":
     st.write("***Floor General:*** **Pass first orchestrator who controls tempo**")
     st.write("***Playmaking Maestro:*** **Scorer with elite secondary playmaking**")
     st.write("***Swiss Army Knife:*** **Does everything, no defined primary role**")
+    st.subheader("Opposing Superteams (not really superteams they aren't that scary actually):")
+    st.write("Celtics: Tatum + Giannis")
+    st.write("Thunder: Shai + KD")
+    st.write("Knicks: Brunson + Booker")
+    st.write("Nuggets: Mitchell + Jokic")
+    st.write("Wizards: Doncic + AD")
 
 elif option == "Headliner Players":
     add_pics("txt/tier1pics.txt", t1_array)
