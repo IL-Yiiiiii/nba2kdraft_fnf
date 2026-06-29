@@ -521,17 +521,11 @@ elif option == "Teams":
             display_player(st.session_state.your_team_array[i])
     st.subheader("*OTHER TEAMS:*")
     st.write(f"[insert here]'s team")
-    st.dataframe(st.session_state.compare_df.T, width='stretch')
     st.write(f"[insert here]'s team")
-    st.dataframe(st.session_state.compare_df.T, width='stretch')
     st.write(f"[insert here]'s team")
-    st.dataframe(st.session_state.compare_df.T, width='stretch')
     st.write(f"[insert here]'s team")
-    st.dataframe(st.session_state.compare_df.T, width='stretch')
     st.write(f"[insert here]'s team")
-    st.dataframe(st.session_state.compare_df.T, width='stretch')
     st.write(f"[insert here]'s team")
-    st.dataframe(st.session_state.compare_df.T, width='stretch')
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
