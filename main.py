@@ -132,20 +132,26 @@ def display_player(player):
             st.subheader(f"Weight: *{player.wt}*")
             st.write("")
             st.write(player.desc)
-            if st.button("Compare Player", key=f"compare_button_{player.name}"):
-                already_added = any(p.name == player.name for p in st.session_state.compare_array)
-                if not already_added:
-                    added_confirm = True
-                    st.session_state.compare_array.append(player.clone())
-                else:
-                    added_already = True
-            if st.button("Draft Player", key=f"draft_button_{player.name}"):
-                already_drafted = any(p.name == player.name for p in st.session_state.your_team_array)
-                if not already_drafted:
-                    drafted_confirm = True
-                    st.session_state.your_team_array.append(player.clone())
-                else:
-                    drafted_already = True
+            col_compare, col_draft = st.columns([1,1])
+            with col_compare:
+                if st.button("Compare Player", key=f"compare_button_{player.name}"):
+                    already_added = any(p.name == player.name for p in st.session_state.compare_array)
+                    if not already_added:
+                        added_confirm = True
+                        st.session_state.compare_array.append(player.clone())
+                    else:
+                        added_already = True
+            with col_draft:
+                if st.button("Draft Player", key=f"draft_button_{player.name}"):
+                    already_drafted = any(p.name == player.name for p in st.session_state.your_team_array)
+                    if not already_drafted:
+                        drafted_confirm = True
+                        st.session_state.your_team_array.append(player.clone())
+                        player_array.remove(player)
+                        st.session_state.drafted_player_array.append(player)
+                        st.rerun()
+                    else:
+                        drafted_already = True
         if added_confirm:
             st.markdown(
                 f"""
