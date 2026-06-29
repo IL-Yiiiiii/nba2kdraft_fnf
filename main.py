@@ -515,12 +515,7 @@ elif option == "Teams":
         for i in range(len(st.session_state.your_team_array)):
             display_player(st.session_state.your_team_array[i])
     st.subheader("*OTHER TEAMS:*")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
-    st.write(f"[insert here]'s team")
+    st.subheader("*UNDER CONSTRUCTION!*")
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
