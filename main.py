@@ -358,6 +358,7 @@ if option == "Home":
     st.write("Also credit to the NBA, Bleacher Report and others for photos please don't copyright me")
 
 elif option == "Guide":
+    st.title("***GUIDE***")
     st.subheader("If rotations are automated:")
     st.write("Playoffs: 8 Man Rotation, Time towards bench - 35")
     st.write("Regular Season: 9 Man Rotation, Time towards bench - 50")
