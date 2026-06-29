@@ -118,10 +118,16 @@ def display_player(player):
     if player.secondary_pos != "":
         secondary = "/" + player.secondary_pos
     with st.expander(f"***{player.name}*** [{player.rating} - {player.primary_pos}{secondary}]"):
-        col_gap1, col_left, col_gap2, col_right = st.columns([1,5,1,10])
+        col_gap1, col_left, col_gap2, col_right, col_gap3 = st.columns([0.5,5,1,7.5,0.5])
         with col_left:
             if player.pic != "":
                 st.image(player.pic)
+        with col_right:
+            st.subheader(f"Set: *{player.set}*")
+            st.subheader(f"Height: *{player.ht}*")
+            st.subheader(f"Weight: *{player.wt}*")
+            st.write("")
+            st.write(player.desc)
             if st.button("Compare Player", key=f"compare_button_{player.name}"):
                 already_added = any(p.name == player.name for p in st.session_state.compare_array)
                 if not already_added:
@@ -132,26 +138,20 @@ def display_player(player):
         if added_confirm:
             st.markdown(
                 f"""
-                    <div style='background-color: #213d25; padding: 10px; border-radius: 5px; 
-                    color: #68e27b; text-align: center; font-weight: italic;'>
-                    {player.name} added to compare!</div>
-                    """,
+                        <div style='background-color: #213d25; padding: 10px; border-radius: 5px; 
+                        color: #68e27b; text-align: center; font-weight: italic;'>
+                        {player.name} added to compare!</div>
+                        """,
                 unsafe_allow_html=True)
         elif added_already:
             st.markdown(
                 f"""
-                <div style='background-color: #3d421f; padding: 10px; border-radius: 5px; 
-                            color: #ffff8a; text-align: center; font-weight: italic;'>
-                 {player.name} already added to compare!
-                </div>
-                """,
+                    <div style='background-color: #3d421f; padding: 10px; border-radius: 5px; 
+                                color: #ffff8a; text-align: center; font-weight: italic;'>
+                     {player.name} already added to compare!
+                    </div>
+                    """,
                 unsafe_allow_html=True)
-        with col_right:
-            st.subheader(f"Set: *{player.set}*")
-            st.subheader(f"Height: *{player.ht}*")
-            st.subheader(f"Weight: *{player.wt}*")
-            st.write("")
-            st.write(player.desc)
         st.markdown("---")
         col_gap1, col_ats_title, col_gap2, col_stats_title1 = st.columns([0.6, 5.3, 1, 8])
         with col_ats_title:
@@ -326,7 +326,10 @@ add_desc("txt/players_desc.txt", player_array)
 option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Teams"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
+if st.sidebar.button("***:rainbow[Send snowflakes!]***"):
+    st.snow()
 if st.sidebar.button("***:rainbow[Send stars!]***"):
+    st.toast("Here's a star!", icon="⭐")
     youtube_url = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
     st.markdown(
         """
@@ -351,6 +354,8 @@ if option == "Home":
     #st.subheader("Your team: ")
     #st.write("[Placeholder for team display]")
     #st.button("Go to team")
+    st.write("------------")
+    st.write("Also credit to the NBA, Bleacher Report and others for photos please don't copyright me")
 
 elif option == "Guide":
     st.title("***GUIDE***")
@@ -405,7 +410,7 @@ elif option == "Headliner Players":
     display_t1()
 
 elif option == "Search Players":
-    #add_pics("txt/playerspics.txt", player_array)
+    add_pics("txt/playerspics.txt", player_array)
     st.title("*PLAYER SEARCH*")
     st.subheader("About the players:")
     st.write("Players in sets 2020-2026 have their ratings based on their projected primes.")
