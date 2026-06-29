@@ -374,13 +374,7 @@ with col_logo:
 if option == "Home":
     st.title("**:orange[Favourites]** *:red[&]* ***:blue[Future]***")
     st.write("Welcome to the draft website - Please use the sidebar to navigate to different features.")
-    st.subheader("Your name: ")
-    st.subheader("Your pick position: " )
-    st.button("Trade pick position")
-    st.subheader("Current Round/Pick: ")
-    st.subheader("Your team: ")
-    st.write("[Placeholder for team display]")
-    st.button("Go to team")
+    st.subheader("*UNDER CONSTRUCTION!*")
     st.write("------------")
     st.write("Also credit to the NBA, Bleacher Report and others for photos please don't copyright me")
 
@@ -512,6 +506,7 @@ elif option == "Compare Players":
 
 elif option == "Draft":
     st.title("*DRAFT*")
+    st.subheader("*UNDER CONSTRUCTION!*")
 
 elif option == "Teams":
     st.title("*TEAMS*")
@@ -529,3 +524,4 @@ elif option == "Teams":
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
+    st.subheader("*UNDER CONSTRUCTION!*")
