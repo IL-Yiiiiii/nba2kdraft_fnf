@@ -182,7 +182,7 @@ def display_player(player):
                         """,
                 unsafe_allow_html=True)
             st.toast(f"You have drafted {player.name}!", icon="🤝")
-            time.sleep(4) 
+            time.sleep(3) 
             st.rerun()
         st.markdown("---")
         col_gap1, col_ats_title, col_gap2, col_stats_title1 = st.columns([0.6, 5.3, 1, 8])
