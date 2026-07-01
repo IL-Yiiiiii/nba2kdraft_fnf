@@ -616,7 +616,7 @@ if option == "Start":
                 st.write("Backup file deleted. Restarting app...")
                 st.rerun()
         if shared_draft["draft_mode"]:
-            st.subheader("WEBSITE IS IN *DRAFT MODE*")
+            st.subheader("Website is in *DRAFT MODE*, please head to 'Draft Hub'")
 
     elif auth_status is False:
         st.error("Username or password is incorrect")
