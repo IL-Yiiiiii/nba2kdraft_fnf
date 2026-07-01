@@ -734,10 +734,10 @@ elif option == "Draft Room":
         if not shared_draft["headliners_resolved"]:
             st.subheader("🎯 Phase 1: Headliner Submission Status")
 
-            if username in shared_draft["coin_flip_losers"]:
+            if username in shared_draft.get("coin_flip_losers", []):
                 st.error(
                     "❌ YOU LOST THE RANDOMIZER! Your choice was taken. Head back to the Headliners tab and pick a remaining player!")
-            elif username in shared_draft["headliner_picks"]:
+            elif username in shared_draft.get("headheadline_picks", {}):
                 st.success(
                     f"✅ You have securely submitted your choice: **{shared_draft['headliner_picks'][username]}**")
             else:
@@ -746,130 +746,129 @@ elif option == "Draft Room":
             st.divider()
 
             # Show who has checked in
-            picks_count = len(shared_draft['headliner_picks'])
+            picks_count = len(shared_draft.get('headliner_picks', {}))
             st.markdown(f"**Submissions received:** `{picks_count} / 7`")
-            st.write("DEBUG INFO:", username, "Picks:", picks_count)
 
-            for user, pick in shared_draft["headliner_picks"].items():
+            for user, pick in shared_draft.get("headliner_picks", {}).items():
                 # Admin sees what they picked, normal users just see that they submitted
                 if st.session_state.get("name") == "Isaac":
                     st.write(f"- **{user.capitalize()}** selected *{pick}*")
                 else:
                     st.write(f"- **{user.capitalize()}** has locked in a choice.")
 
-                    # Admin Button to run coin flips and sort 98/99s
-                    if username.lower() == "isaac" and picks_count == 7:
-                        st.write("")
-                        if st.button("Resolve Contests & Generate Draft Order", type="primary"):
+            # Admin Button to run coin flips and sort 98/99s
+            # MOVED: Placed cleanly outside the 'for' loop so it can render for Isaac
+            if username.lower() == "isaac" and picks_count == 7:
+                st.write("")
+                if st.button("Resolve Contests & Generate Draft Order", type="primary"):
 
-                            pick_counts = {}
-                            for u, p_name in shared_draft["headliner_picks"].items():
-                                if p_name not in pick_counts:
-                                    pick_counts[p_name] = []
-                                pick_counts[p_name].append(u)
+                    pick_counts = {}
+                    for u, p_name in shared_draft["headliner_picks"].items():
+                        if p_name not in pick_counts:
+                            pick_counts[p_name] = []
+                        pick_counts[p_name].append(u)
 
-                            losers_this_round = []
+                    losers_this_round = []
 
-                            for p_name, users in pick_counts.items():
-                                winner = random.choice(users)
-                                player_obj = next((p for p in shared_draft["t1_array"] if p.name == p_name), None)
+                    for p_name, users in pick_counts.items():
+                        winner = random.choice(users)
+                        player_obj = next((p for p in shared_draft["t1_array"] if p.name == p_name), None)
 
-                                if player_obj:
-                                    if winner not in shared_draft["all_teams"]:
-                                        shared_draft["all_teams"][winner] = []
-                                    shared_draft["all_teams"][winner].append(player_obj.clone())
-                                    shared_draft["drafted_t1_array"].append(player_obj.clone())
-                                    shared_draft["t1_array"] = [p for p in shared_draft["t1_array"] if p.name != p_name]
+                        if player_obj:
+                            if winner not in shared_draft["all_teams"]:
+                                shared_draft["all_teams"][winner] = []
+                            shared_draft["all_teams"][winner].append(player_obj.clone())
+                            shared_draft["drafted_t1_array"].append(player_obj.clone())
+                            shared_draft["t1_array"] = [p for p in shared_draft["t1_array"] if p.name != p_name]
 
-                                for u in users:
-                                    if u != winner:
-                                        losers_this_round.append(u)
-                                        del shared_draft["headliner_picks"][u]
+                        for u in users:
+                            if u != winner:
+                                losers_this_round.append(u)
+                                del shared_draft["headliner_picks"][u]
 
-                            if len(losers_this_round) > 0:
-                                shared_draft["coin_flip_losers"] = losers_this_round
-                            else:
-                                # Clean finish! Separate and shuffle 98s vs 99s
-                                shared_draft["headliners_resolved"] = True
-                                pool_98 = []
-                                pool_99 = []
-                                pool_other = []
+                    if len(losers_this_round) > 0:
+                        shared_draft["coin_flip_losers"] = losers_this_round
+                    else:
+                        # Clean finish! Separate and shuffle 98s vs 99s
+                        shared_draft["headliners_resolved"] = True
+                        pool_98 = []
+                        pool_99 = []
+                        pool_other = []
 
-                                for u in shared_draft["headliner_picks"].keys():
-                                    roster = shared_draft["all_teams"].get(u, [])
-                                    if roster:
-                                        try:
-                                            rating = int(roster[0].rating)
-                                            if rating == 98:
-                                                pool_98.append(u)
-                                            elif rating == 99:
-                                                pool_99.append(u)
-                                            else:
-                                                pool_other.append(u)
-                                        except ValueError:
-                                            pool_other.append(u)
+                        for u in shared_draft["headliner_picks"].keys():
+                            roster = shared_draft["all_teams"].get(u, [])
+                            if roster:
+                                try:
+                                    rating = int(roster[0].rating)
+                                    if rating == 98:
+                                        pool_98.append(u)
+                                    elif rating == 99:
+                                        pool_99.append(u)
                                     else:
                                         pool_other.append(u)
-
-                                random.shuffle(pool_98)
-                                random.shuffle(pool_99)
-                                random.shuffle(pool_other)
-
-                                shared_draft["draft_order"] = pool_98 + pool_99 + pool_other
-
-                            st.rerun()
-
-                        # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
-                        elif shared_draft["headliners_resolved"]:
-                            # Safely grab history so it never KeyErrors!
-                            history = shared_draft.get("draft_history", [])
-                            current_pick_idx = len(history)
-
-                            total_teams = 7
-                            total_rounds = 8
-
-                            curr_r = (current_pick_idx // total_teams) + 1
-                            curr_p = (current_pick_idx % total_teams) + 1
-
-                            if current_pick_idx < (total_teams * total_rounds):
-                                if curr_r % 2 != 0:
-                                    current_owner = shared_draft["draft_order"][curr_p - 1]
-                                else:
-                                    current_owner = shared_draft["draft_order"][total_teams - curr_p]
-
-                                st.info(
-                                    f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}**")
-                                if username == current_owner:
-                                    st.success("👉 It's your turn! Head to the search tabs to claim a player.")
+                                except ValueError:
+                                    pool_other.append(u)
                             else:
-                                st.balloons()
-                                st.success("🎉 The draft is officially complete!")
+                                pool_other.append(u)
 
-                            st.write("")
-                            with st.expander("👑 View Phase 1: Headliner Selections", expanded=False):
-                                for team_owner, roster in shared_draft["all_teams"].items():
-                                    if roster:
-                                        st.write(
-                                            f"- **{team_owner.capitalize()}** secured: *{roster[0].name} ({roster[0].rating} OVR)*")
+                        random.shuffle(pool_98)
+                        random.shuffle(pool_99)
+                        random.shuffle(pool_other)
 
-                            st.divider()
-                            st.subheader("📋 Draft Progress Board")
+                        shared_draft["draft_order"] = pool_98 + pool_99 + pool_other
 
-                            for pick_num in range(total_rounds * total_teams):
-                                r = (pick_num // total_teams) + 1
-                                p = (pick_num % total_teams) + 1
+                    st.rerun()
 
-                                if r % 2 != 0:
-                                    owner = shared_draft["draft_order"][p - 1]
-                                else:
-                                    owner = shared_draft["draft_order"][total_teams - p]
+        # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
+        # MOVED: Properly aligned with Phase 1 out of the loop
+        elif shared_draft["headliners_resolved"]:
+            history = shared_draft.get("draft_history", [])
+            current_pick_idx = len(history)
 
-                                if pick_num < len(history):
-                                    st.write(f"🟢 **Round {r}.{p}** | **{owner.capitalize()}** ➔ *{history[pick_num]}*")
-                                elif pick_num == len(history):
-                                    st.markdown(f"🟠 **Round {r}.{p}** | **{owner.capitalize()}** ➔ `🤔 NOW PICKING...`")
-                                else:
-                                    st.write(f"⚪ Round {r}.{p} | {owner.capitalize()} ➔ ⏳ *Pending*")
+            total_teams = 7
+            total_rounds = 8
+
+            curr_r = (current_pick_idx // total_teams) + 1
+            curr_p = (current_pick_idx % total_teams) + 1
+
+            if current_pick_idx < (total_teams * total_rounds):
+                if curr_r % 2 != 0:
+                    current_owner = shared_draft["draft_order"][curr_p - 1]
+                else:
+                    current_owner = shared_draft["draft_order"][total_teams - curr_p]
+
+                st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}**")
+                if username == current_owner:
+                    st.success("👉 It's your turn! Head to the search tabs to claim a player.")
+            else:
+                st.balloons()
+                st.success("🎉 The draft is officially complete!")
+
+            st.write("")
+            with st.expander("👑 View Phase 1: Headliner Selections", expanded=False):
+                for team_owner, roster in shared_draft["all_teams"].items():
+                    if roster:
+                        st.write(
+                            f"- **{team_owner.capitalize()}** secured: *{roster[0].name} ({roster[0].rating} OVR)*")
+
+            st.divider()
+            st.subheader("📋 Draft Progress Board")
+
+            for pick_num in range(total_rounds * total_teams):
+                r = (pick_num // total_teams) + 1
+                p = (pick_num % total_teams) + 1
+
+                if r % 2 != 0:
+                    owner = shared_draft["draft_order"][p - 1]
+                else:
+                    owner = shared_draft["draft_order"][total_teams - p]
+
+                if pick_num < len(history):
+                    st.write(f"🟢 **Round {r}.{p}** | **{owner.capitalize()}** ➔ *{history[pick_num]}*")
+                elif pick_num == len(history):
+                    st.markdown(f"🟠 **Round {r}.{p}** | **{owner.capitalize()}** ➔ `🤔 NOW PICKING...`")
+                else:
+                    st.write(f"⚪ Round {r}.{p} | {owner.capitalize()} ➔ ⏳ *Pending*")
 
 elif option == "Teams":
     st.title("*TEAMS*")
@@ -888,18 +887,16 @@ elif option == "Teams":
     if not shared_draft["draft_mode"]:
         st.divider()
         st.subheader("*THIS PAGE WILL CHANGE IN DRAFT MODE!*")
+
     if shared_draft["draft_mode"]:
         st.divider()
         st.subheader("*OTHER TEAMS:*")
 
-        # 1. Filter the dictionary to ONLY include opponents
         other_teams = {owner: roster for owner, roster in shared_draft["all_teams"].items() if owner != username}
 
-        # 2. Check if the opponent list is empty
         if not other_teams:
             st.write("No one else has drafted any players yet!")
         else:
-            # 3. Loop through the filtered opponents
             for team_owner, roster in other_teams.items():
                 with st.expander(f"{team_owner.capitalize()}'s Team ({len(roster)} players)"):
                     if not roster:
