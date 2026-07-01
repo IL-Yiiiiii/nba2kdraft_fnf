@@ -817,7 +817,7 @@ elif option == "Draft Room":
                     owner = shared_draft["draft_order"][total_teams - p]
 
                 if pick_num < len(shared_draft["draft_history"]):
-                    st.write(f"🟢 **Round {r}.{p}** | **{owner}** ➔ *{shared_draft['draft_history'][pick_num]}*")
+                    st.write(f"🟢 **Round {r}.{p}** | **{owner.capitalize()}** ➔ *{shared_draft['draft_history'][pick_num]}*")
                 elif pick_num == len(shared_draft["draft_history"]):
                     st.markdown(f"🟠 **Round {r}.{p}** | **{owner.capitalize()}** ➔ `🤔 NOW PICKING...`")
                 else:
