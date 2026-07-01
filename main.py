@@ -131,7 +131,7 @@ def load(file, array):
                                spg, bpg, fgp, thp, ftp))
     except FileNotFoundError:
         print("File not found")
-        
+
 # Look for a saved file on the server first
 saved_state = load_draft_state()
 
@@ -198,6 +198,7 @@ def display_player(player):
                                                             p.name != player.name]
 
                     drafted_confirm = False
+                    save_draft_state(shared_draft)
                     st.session_state.pending_toast = {"message": f"You have undrafted {player.name}!", "icon": "🚫"}
                     st.rerun()
         with col_right:
@@ -260,6 +261,8 @@ def display_player(player):
                             # Clear them from the losers list if they are submitting a backup choice
                             if username in shared_draft.get("coin_flip_losers", []):
                                 shared_draft["coin_flip_losers"].remove(username)
+
+                            save_draft_state(shared_draft)  # 💾 ADD THIS LINE HERE!
 
                             st.session_state.pending_toast = {"message": f"🔒 Locked in choice: {player.name}!",
                                                               "icon": "🎯"}
