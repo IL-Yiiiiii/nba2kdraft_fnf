@@ -730,32 +730,6 @@ elif option == "Compare Players":
     load_to_df(st.session_state.compare_array)
     st.dataframe(st.session_state.compare_df.T, width='stretch')
 
-# ==========================================
-# GLOBAL ON-THE-CLOCK NOTIFICATION SYSTEM
-# ==========================================
-# Only trigger if the draft has actually started and headliners are resolved
-if shared_draft.get("draft_mode") and shared_draft.get("headliners_resolved"):
-
-    history = shared_draft.get("draft_history", [])
-    current_pick_idx = len(history)
-    total_teams = 7
-    total_rounds = 8
-
-    # Ensure the draft isn't over yet
-    if current_pick_idx < (total_teams * total_rounds):
-        curr_r = (current_pick_idx // total_teams) + 1
-        curr_p = (current_pick_idx % total_teams) + 1
-
-        # Calculate current owner using your snake draft math
-        if curr_r % 2 != 0:
-            current_owner = shared_draft["draft_order"][curr_p - 1]
-        else:
-            current_owner = shared_draft["draft_order"][total_teams - curr_p]
-
-        # If the viewer is the current owner, fire a toast on EVERY page refresh!
-        if username == current_owner:
-            st.toast(f"🚨 YOU ARE ON THE CLOCK! (Round {curr_r}.{curr_p})", icon="⏰")
-            
 elif option == "Draft Room":
     st.title("*DRAFT ROOM*")
 
@@ -988,6 +962,32 @@ elif option == "Teams":
                         for player in roster:
                             display_player(player)
 
+# ==========================================
+# GLOBAL ON-THE-CLOCK NOTIFICATION SYSTEM
+# ==========================================
+# Only trigger if the draft has actually started and headliners are resolved
+if shared_draft.get("draft_mode") and shared_draft.get("headliners_resolved"):
+
+    history = shared_draft.get("draft_history", [])
+    current_pick_idx = len(history)
+    total_teams = 7
+    total_rounds = 8
+
+    # Ensure the draft isn't over yet
+    if current_pick_idx < (total_teams * total_rounds):
+        curr_r = (current_pick_idx // total_teams) + 1
+        curr_p = (current_pick_idx % total_teams) + 1
+
+        # Calculate current owner using your snake draft math
+        if curr_r % 2 != 0:
+            current_owner = shared_draft["draft_order"][curr_p - 1]
+        else:
+            current_owner = shared_draft["draft_order"][total_teams - curr_p]
+
+        # If the viewer is the current owner, fire a toast on EVERY page refresh!
+        if username == current_owner:
+            st.toast(f"🚨 YOU ARE ON THE CLOCK! (Round {curr_r}.{curr_p})", icon="⏰")
+            
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
     if not shared_draft["draft_mode"]:
