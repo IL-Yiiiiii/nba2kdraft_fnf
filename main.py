@@ -757,7 +757,7 @@ elif option == "Draft Room":
                     st.write(f"- **{user.capitalize()}** has locked in a choice.")
 
                     # Admin Button to run coin flips and sort 98/99s
-                    if st.session_state.get("name") == "Isaac" and picks_count == 7:
+                    if username.lower() == "isaac" and picks_count == 7:
                         st.write("")
                         if st.button("Resolve Contests & Generate Draft Order", type="primary"):
 
