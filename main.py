@@ -3,30 +3,39 @@ import streamlit_authenticator as stauth
 from streamlit_autorefresh import st_autorefresh
 import os
 import pickle
+import sys  # 👈 1. ADD THIS IMPORT
 
 DB_FILE = "draft_backup.pkl"
+
+# ==========================================
+# 1. UPGRADED ATOMIC SAVE & SAFE LOAD HELPERS
+# ==========================================
 def save_draft_state(state_dict):
-    """Saves the current shared_draft state to a physical file."""
-    with open(DB_FILE, "wb") as f:
-        pickle.dump(state_dict, f)
+    """Saves the current shared_draft state to a physical file atomically."""
+    tmp_file = DB_FILE + ".tmp"
+    try:
+        with open(tmp_file, "wb") as f:
+            pickle.dump(state_dict, f)
+        # 🔑 THE FIX: Instantly swaps the temp file with the real one.
+        # No more 0-byte truncation states for auto-refresh to trip over!
+        os.replace(tmp_file, DB_FILE)
+    except Exception as e:
+        st.error(f"💾 Failed to save draft state: {e}")
 
 def load_draft_state():
-    """Loads the draft state from the file if it exists, safely."""
+    """Loads the draft state from the file safely, preventing silent resets."""
     if os.path.exists(DB_FILE):
-        # 1. Check if the file is completely empty first
-        if os.path.getsize(DB_FILE) > 0:
-            try:
-                with open(DB_FILE, "rb") as f:
-                    return pickle.load(f)
-            except EOFError:
-                # Catch the specific error you just got
-                return None
-            except Exception:
-                # Catch any other corruption errors just in case
-                return None
-        else:
-            # File exists but is 0 bytes
+        try:
+            with open(DB_FILE, "rb") as f:
+                return pickle.load(f)
+        except (EOFError, FileNotFoundError):
+            # Safe fallbacks if hit during an active file switch operation
             return None
+        except Exception as e:
+            # 🚨 Crucial: If it's a real class structure error, freeze the app
+            # and show it instead of silently resetting your entire draft!
+            st.error(f"🚨 Critical error reading draft backup file: {e}")
+            st.stop()
     return None
 
 class Player:
@@ -132,14 +141,17 @@ def load(file, array):
     except FileNotFoundError:
         print("File not found")
 
-# Look for a saved file on the server first
+# 🚀 2. FORCE-BIND CLASS TO MAIN SPACE (Fixes dynamic Streamlit module pickling errors)
+sys.modules['__main__'].Player = Player
+
+# ==========================================
+# 3. LOAD THE STABLE BACKUP
+# ==========================================
 saved_state = load_draft_state()
 
 if saved_state is not None:
-    # Thaw out the existing draft data!
     shared_draft = saved_state
 else:
-    # If no file exists, create a fresh master dictionary
     shared_draft = {
         "initialized": False,
         "player_array": [],
