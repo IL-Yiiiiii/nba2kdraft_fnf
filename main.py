@@ -1,4 +1,4 @@
-import copy, streamlit as st, pandas as pd, time
+import copy, streamlit as st, pandas as pd
 import streamlit_authenticator as stauth
 
 class Player:
@@ -117,7 +117,7 @@ def display_player(player):
         with col_left:
             if player.pic != "":
                 st.image(player.pic)
-            if not draft_mode:
+            if not st.session_state.draft_mode:
                 if st.button("Undo draft player", key=f"undo_button_{player.name}"):
                     was_in_regular = any(p.name == player.name for p in st.session_state.drafted_player_array)
                     was_in_t1 = any(p.name == player.name for p in st.session_state.drafted_t1_array)
@@ -273,6 +273,7 @@ def add_pics(filename, array):
 
 def colour_grade(grade):
     grade = str(grade)
+    new = None
     if grade == "S":
         new = f":violet[{grade}]"
     elif grade == "A+":
@@ -391,7 +392,8 @@ if "t1_array" not in st.session_state:
 if "pending_toast" in st.session_state:
     st.toast(st.session_state.pending_toast["message"], icon=st.session_state.pending_toast["icon"])
     del st.session_state.pending_toast
-draft_mode = False
+if "draft_mode" not in st.session_state:
+    st.session_state.draft_mode = False
 option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft", "Teams", "Trade Hub", "Results"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
@@ -444,14 +446,17 @@ if option == "Home":
         st.subheader(f"*Logged in as:* **{name}**")
         authenticator.logout("**LOG OUT**", "main")
         st.divider()
-        if not draft_mode:
+        if not st.session_state.draft_mode:
             st.subheader("**Website currently in pre-draft mode**")
             st.write("You can look at players and build teams")
         if name == "IL":
             if st.button("START DRAFT"):
-                draft_mode = True
+                st.session_state.draft_mode = True
                 st.rerun()
-        if draft_mode:
+            if st.button("REVERT TO PRE-DRAFT MODE"):
+                st.session_state.draft_mode = False
+                st.rerun()
+        if st.session_state.draft_mode:
             st.subheader("WEBSITE IS IN *DRAFT MODE*")
             st.subheader("Your pick position: ")
             st.button("Trade pick position")
@@ -611,9 +616,9 @@ elif option == "Teams":
     if st.session_state.your_team_array:
         for i in range(len(st.session_state.your_team_array)):
             display_player(st.session_state.your_team_array[i])
-    if not draft_mode:
+    if not st.session_state.draft_mode:
         st.subheader("*THIS PAGE WILL CHANGE IN DRAFT MODE!*")
-    if draft_mode:
+    if st.session_state.draft_mode:
         st.subheader("*OTHER TEAMS:*")
         st.write(f"[insert here]'s team")
         st.write(f"[insert here]'s team")
@@ -624,7 +629,7 @@ elif option == "Teams":
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
-    if not draft_mode:
+    if not st.session_state.draft_mode:
         st.subheader("**Will open in draft mode!**")
 
 elif option == "Results":
