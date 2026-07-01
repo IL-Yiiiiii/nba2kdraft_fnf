@@ -1,6 +1,40 @@
 import copy, streamlit as st, pandas as pd, random
 import streamlit_authenticator as stauth
 from streamlit_autorefresh import st_autorefresh
+import os
+import pickle
+
+DB_FILE = "draft_backup.pkl"
+
+def save_draft_state(state_dict):
+    """Saves the current shared_draft state to a physical file."""
+    with open(DB_FILE, "wb") as f:
+        pickle.dump(state_dict, f)
+
+def load_draft_state():
+    """Loads the draft state from the file if it exists."""
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, "rb") as f:
+            return pickle.load(f)
+    return None
+
+# Look for a saved file on the server first
+saved_state = load_draft_state()
+
+if saved_state is not None:
+    # Thaw out the existing draft data!
+    shared_draft = saved_state
+else:
+    # If no file exists, ONLY THEN do you run your original initialization logic
+    shared_draft = {
+        "draft_mode": False,
+        "headliners_resolved": False,
+        "headliner_picks": {},
+        "all_teams": {},
+        "draft_history": [],
+        # ... your other original setup keys ...
+    }
+
 st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
 @st.cache_resource
 def get_global_draft_store():
@@ -295,6 +329,7 @@ def display_player(player):
                         msg = f"You have drafted {player.name}!"
 
                     st.session_state.pending_toast = {"message": msg, "icon": "🤝"}
+                    save_draft_state(shared_draft)
                     st.rerun()
 
         # Attribute and Stats layout section remains unchanged below this...
@@ -548,40 +583,13 @@ if option == "Start":
             if st.button("REVERT TO PRE-DRAFT MODE"):
                 shared_draft["draft_mode"] = False
                 st.rerun()
+            if st.button("⚠️ EMERGENCY RESET ENTIRE DRAFT"):
+                if os.path.exists(DB_FILE):
+                    os.remove(DB_FILE)
+                st.write("Backup file deleted. Restarting app...")
+                st.rerun()
         if shared_draft["draft_mode"]:
             st.subheader("WEBSITE IS IN *DRAFT MODE*")
-            st.divider()
-
-            # Dynamic Pick Position and Current Pick
-            if shared_draft["headliners_resolved"]:
-                # 1. Find their pick position
-                if username in shared_draft["draft_order"]:
-                    pick_pos = shared_draft["draft_order"].index(username) + 1
-                    st.subheader(f"Your pick position: **{pick_pos}**")
-                else:
-                    st.subheader(f"Your pick position: **N/A**")
-
-                # 2. Calculate the current round and pick on the clock
-                current_pick_idx = len(shared_draft.get("draft_history", []))
-                curr_r = (current_pick_idx // 7) + 1
-                curr_p = (current_pick_idx % 7) + 1
-                st.subheader(f"Current Round/Pick: **{curr_r}.{curr_p}**")
-            else:
-                # Fallback text while Headliners are still being picked
-                st.subheader("Your pick position: **TBD (Pending Headliners)**")
-                st.subheader("Current Round/Pick: **Phase 1**")
-
-            st.button("Trade pick position")
-
-            # Dynamic Team Overview
-            st.subheader("Your team: ")
-            user_roster = shared_draft["all_teams"].get(username, [])
-            if user_roster:
-                st.write(f"You currently have **{len(user_roster)}** player(s) drafted.")
-            else:
-                st.write("No players drafted yet.")
-
-            st.button("Go to team")
 
     elif auth_status is False:
         st.error("Username or password is incorrect")
@@ -722,6 +730,32 @@ elif option == "Compare Players":
     load_to_df(st.session_state.compare_array)
     st.dataframe(st.session_state.compare_df.T, width='stretch')
 
+# ==========================================
+# GLOBAL ON-THE-CLOCK NOTIFICATION SYSTEM
+# ==========================================
+# Only trigger if the draft has actually started and headliners are resolved
+if shared_draft.get("draft_mode") and shared_draft.get("headliners_resolved"):
+
+    history = shared_draft.get("draft_history", [])
+    current_pick_idx = len(history)
+    total_teams = 7
+    total_rounds = 8
+
+    # Ensure the draft isn't over yet
+    if current_pick_idx < (total_teams * total_rounds):
+        curr_r = (current_pick_idx // total_teams) + 1
+        curr_p = (current_pick_idx % total_teams) + 1
+
+        # Calculate current owner using your snake draft math
+        if curr_r % 2 != 0:
+            current_owner = shared_draft["draft_order"][curr_p - 1]
+        else:
+            current_owner = shared_draft["draft_order"][total_teams - curr_p]
+
+        # If the viewer is the current owner, fire a toast on EVERY page refresh!
+        if username == current_owner:
+            st.toast(f"🚨 YOU ARE ON THE CLOCK! (Round {curr_r}.{curr_p})", icon="⏰")
+            
 elif option == "Draft Room":
     st.title("*DRAFT ROOM*")
 
@@ -817,6 +851,8 @@ elif option == "Draft Room":
                         random.shuffle(pool_other)
 
                         shared_draft["draft_order"] = pool_98 + pool_99 + pool_other
+
+                        save_draft_state(shared_draft)
 
                     st.rerun()
 
