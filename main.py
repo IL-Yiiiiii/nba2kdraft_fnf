@@ -522,6 +522,8 @@ if not shared_draft["initialized"]:
     shared_draft["initialized"] = True
 # --------------------------------------
 option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
+if shared_draft["draft_mode"]:
+    username = st.session_state.get("username", "Guest")
 # ==========================================
 # GLOBAL ON-THE-CLOCK NOTIFICATION SYSTEM
 # ==========================================
@@ -760,9 +762,6 @@ elif option == "Draft Room":
 
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
-
-    else:
-        username = st.session_state.get("username", "Guest")
 
         # --- PHASE 1 DISPLAY: WAITING ON BLIND HEADLINERS ---
         if not shared_draft["headliners_resolved"]:
