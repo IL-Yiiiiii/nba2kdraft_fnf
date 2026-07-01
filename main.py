@@ -796,7 +796,7 @@ elif option == "Draft Room":
                 else:
                     current_owner = shared_draft["draft_order"][total_teams - curr_p]
 
-                st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner}**")
+                st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}** -> Go to 'Search Players' and pick one!")
                 if username == current_owner:
                     st.success("👉 It's your turn! Head to the search tabs to claim a player.")
             else:
@@ -819,9 +819,9 @@ elif option == "Draft Room":
                 if pick_num < len(shared_draft["draft_history"]):
                     st.write(f"🟢 **Round {r}.{p}** | **{owner}** ➔ *{shared_draft['draft_history'][pick_num]}*")
                 elif pick_num == len(shared_draft["draft_history"]):
-                    st.markdown(f"🟠 **Round {r}.{p}** | **{owner}** ➔ `🤔 NOW PICKING...`")
+                    st.markdown(f"🟠 **Round {r}.{p}** | **{owner.capitalize()}** ➔ `🤔 NOW PICKING...`")
                 else:
-                    st.write(f"⚪ Round {r}.{p} | {owner} ➔ ⏳ *Pending*")
+                    st.write(f"⚪ Round {r}.{p} | {owner.capitalize()} ➔ ⏳ *Pending*")
 
 elif option == "Teams":
     st.title("*TEAMS*")
