@@ -937,7 +937,7 @@ elif option == "Draft Room":
                 else:
                     prev_owner = shared_draft["draft_order"][total_teams - prev_p]
 
-                st.success(f"📢 **LATEST DRAFT PICK:** **{prev_owner.capitalize()}** selected **{history[-1]}**!")
+                st.warning(f"📢 **LATEST DRAFT PICK:** **{prev_owner.capitalize()}** selected **{history[-1]}**!")
 
             st.write("")
 
