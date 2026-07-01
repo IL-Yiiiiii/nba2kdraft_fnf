@@ -29,31 +29,6 @@ def load_draft_state():
             return None
     return None
 
-# Look for a saved file on the server first
-saved_state = load_draft_state()
-
-if saved_state is not None:
-    # Thaw out the existing draft data!
-    shared_draft = saved_state
-else:
-    # If no file exists, create a fresh master dictionary
-    shared_draft = {
-        "initialized": False,
-        "player_array": [],
-        "t1_array": [],
-        "drafted_player_array": [],
-        "drafted_t1_array": [],
-        "all_teams": {},
-        "headliner_picks": {},
-        "draft_order": [],
-        "headliners_resolved": False,
-        "coin_flip_losers": [],
-        "draft_history": [],
-        "draft_mode": False
-    }
-
-st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
-
 class Player:
     def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
         self.name = name
@@ -156,7 +131,31 @@ def load(file, array):
                                spg, bpg, fgp, thp, ftp))
     except FileNotFoundError:
         print("File not found")
+        
+# Look for a saved file on the server first
+saved_state = load_draft_state()
 
+if saved_state is not None:
+    # Thaw out the existing draft data!
+    shared_draft = saved_state
+else:
+    # If no file exists, create a fresh master dictionary
+    shared_draft = {
+        "initialized": False,
+        "player_array": [],
+        "t1_array": [],
+        "drafted_player_array": [],
+        "drafted_t1_array": [],
+        "all_teams": {},
+        "headliner_picks": {},
+        "draft_order": [],
+        "headliners_resolved": False,
+        "coin_flip_losers": [],
+        "draft_history": [],
+        "draft_mode": False
+    }
+
+st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
 
 def display_player(player):
     added_confirm = False
