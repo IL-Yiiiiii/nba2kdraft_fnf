@@ -895,7 +895,6 @@ elif option == "Draft Room":
                 st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}**")
                 if username == current_owner:
                         # Trigger the pop-up notification
-                    st.toast(f"You are on the clock for Round {curr_r}.{curr_p}!", icon="⏰")
                     st.error("👉 IT IS YOUR TURN! Head to 'Search Players' to draft a player.")
             else:
                 st.balloons()
@@ -987,7 +986,7 @@ if shared_draft.get("draft_mode") and shared_draft.get("headliners_resolved"):
         # If the viewer is the current owner, fire a toast on EVERY page refresh!
         if username == current_owner:
             st.toast(f"🚨 YOU ARE ON THE CLOCK! (Round {curr_r}.{curr_p})", icon="⏰")
-            
+
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
     if not shared_draft["draft_mode"]:
