@@ -273,23 +273,29 @@ def display_player(player):
 
                             drafted_confirm = True  # Triggers your original success logic
 
-        # HTML/Toast warning rendering remains the same...
-        if added_confirm:
-            st.markdown(
-                f"<div style='background-color: #213d3b; padding: 10px; border-radius: 5px; color: #8afffd; text-align: center; font-style: italic;'>{player.name} added to compare!</div>",
-                unsafe_allow_html=True)
-            st.toast(f"{player.name} added to compare!", icon="⚖️")
-        elif added_already:
-            st.markdown(
-                f"<div style='background-color: #3d421f; padding: 10px; border-radius: 5px; color: #ffff8a; text-align: center; font-style: italic;'>{player.name} already added to compare!</div>",
-                unsafe_allow_html=True)
-        if drafted_already:
-            st.markdown(
-                f"<div style='background-color: #421f1f; padding: 10px; border-radius: 5px; color: #ff8a8a; text-align: center; font-style: italic;'>{player.name} has already been drafted!</div>",
-                unsafe_allow_html=True)
-        elif drafted_confirm:
-            st.session_state.pending_toast = {"message": f"You have drafted {player.name}!", "icon": "🤝"}
-            st.rerun()
+                # HTML/Toast warning rendering remains the same...
+                if added_confirm:
+                    st.markdown(
+                        f"<div style='background-color: #213d3b; padding: 10px; border-radius: 5px; color: #8afffd; text-align: center; font-style: italic;'>{player.name} added to compare!</div>",
+                        unsafe_allow_html=True)
+                    st.toast(f"{player.name} added to compare!", icon="⚖️")
+                elif added_already:
+                    st.markdown(
+                        f"<div style='background-color: #3d421f; padding: 10px; border-radius: 5px; color: #ffff8a; text-align: center; font-style: italic;'>{player.name} already added to compare!</div>",
+                        unsafe_allow_html=True)
+                if drafted_already:
+                    st.markdown(
+                        f"<div style='background-color: #421f1f; padding: 10px; border-radius: 5px; color: #ff8a8a; text-align: center; font-style: italic;'>{player.name} has already been drafted!</div>",
+                        unsafe_allow_html=True)
+                elif drafted_confirm:
+                    # CHANGED: Custom dynamic message depending on draft mode
+                    if shared_draft["draft_mode"] and shared_draft["headliners_resolved"]:
+                        msg = f"📢 {username.capitalize()} has drafted {player.name}!"
+                    else:
+                        msg = f"You have drafted {player.name}!"
+
+                    st.session_state.pending_toast = {"message": msg, "icon": "🤝"}
+                    st.rerun()
 
         # Attribute and Stats layout section remains unchanged below this...
         st.markdown("---")
@@ -480,7 +486,7 @@ if not shared_draft["initialized"]:
     # Flip the master switch so the server remembers this data is ready
     shared_draft["initialized"] = True
 # --------------------------------------
-option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
+option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
 if st.sidebar.button("***:rainbow[Send snowflakes!]***"):
@@ -503,7 +509,7 @@ st.sidebar.write("*Also credit to the NBA, Bleacher Report and others for photos
 col_logo, col_blank = st.columns(2)
 with col_logo:
     st.image("images/Logo.png")
-if option == "Home":
+if option == "Start":
     st.title("**:orange[Favourites]** *:red[&]* ***:blue[Future]***")
     st.write("Welcome to the draft website - Please use the sidebar to navigate to different features.")
     #Login part
@@ -544,18 +550,6 @@ if option == "Home":
                 st.rerun()
         if shared_draft["draft_mode"]:
             st.subheader("WEBSITE IS IN *DRAFT MODE* - Head to the 'Draft Room'")
-            st.subheader("Your pick position: ")
-            st.button("Trade pick position")
-            st.subheader("Current Round/Pick: ")
-            st.subheader("Your team: ")
-            st.write("[Placeholder for team display]")
-            st.button("Go to team")
-
-        # current_pick_team = get_whose_turn_it_is(st.session_state.get("picks_made", 0))
-        # if username == current_pick_team:
-        # st.success("It's your turn to pick!")
-        # else:
-        # st.info(f"Waiting on {current_pick_team} to pick...")
 
     elif auth_status is False:
         st.error("Username or password is incorrect")
@@ -698,6 +692,8 @@ elif option == "Compare Players":
 
 elif option == "Draft Room":
     st.title("*DRAFT ROOM*")
+    st.subheader(f"Your pick position in the order: {shared_draft["draft_order"]}")
+    st.button("Trade pick position")
 
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
@@ -781,47 +777,57 @@ elif option == "Draft Room":
 
                     st.rerun()
 
-        # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
-        elif shared_draft["headliners_resolved"]:
-            current_pick_idx = len(shared_draft["draft_history"])
-            total_teams = 7
-            total_rounds = 12
+                # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
+                elif shared_draft["headliners_resolved"]:
+                    current_pick_idx = len(shared_draft["draft_history"])
+                    total_teams = 7
+                    total_rounds = 8  # CHANGED: Updated from 12 to 8 rounds
 
-            curr_r = (current_pick_idx // total_teams) + 1
-            curr_p = (current_pick_idx % total_teams) + 1
+                    curr_r = (current_pick_idx // total_teams) + 1
+                    curr_p = (current_pick_idx % total_teams) + 1
 
-            if current_pick_idx < (total_teams * total_rounds):
-                if curr_r % 2 != 0:
-                    current_owner = shared_draft["draft_order"][curr_p - 1]
-                else:
-                    current_owner = shared_draft["draft_order"][total_teams - curr_p]
+                    if current_pick_idx < (total_teams * total_rounds):
+                        if curr_r % 2 != 0:
+                            current_owner = shared_draft["draft_order"][curr_p - 1]
+                        else:
+                            current_owner = shared_draft["draft_order"][total_teams - curr_p]
 
-                st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}**")
-                if username == current_owner:
-                    st.success("👉 It's your turn! Head to 'Search Players' and pick one!")
-            else:
-                st.balloons()
-                st.success("🎉 The draft is officially complete!")
+                        st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}**")
+                        if username == current_owner:
+                            st.success("👉 It's your turn! Head to the search tabs to claim a player.")
+                    else:
+                        st.balloons()
+                        st.success("🎉 The draft is officially complete!")
 
-            st.divider()
-            st.subheader("📋 Draft Progress Board")
+                    # ADDED: Persistent display of Headliner Picks
+                    st.write("")
+                    with st.expander("👑 View Phase 1: Headliner Selections", expanded=False):
+                        for team_owner, roster in shared_draft["all_teams"].items():
+                            if roster:
+                                # The first player in their roster list is always their Headliner pick
+                                st.write(
+                                    f"- **{team_owner.capitalize()}** secured: *{roster[0].name} ({roster[0].rating} OVR)*")
 
-            # Print the entire serpentine map dynamically
-            for pick_num in range(total_rounds * total_teams):
-                r = (pick_num // total_teams) + 1
-                p = (pick_num % total_teams) + 1
+                    st.divider()
+                    st.subheader("📋 Draft Progress Board")
 
-                if r % 2 != 0:
-                    owner = shared_draft["draft_order"][p - 1]
-                else:
-                    owner = shared_draft["draft_order"][total_teams - p]
+                    # Print the entire serpentine map dynamically
+                    for pick_num in range(total_rounds * total_teams):
+                        r = (pick_num // total_teams) + 1
+                        p = (pick_num % total_teams) + 1
 
-                if pick_num < len(shared_draft["draft_history"]):
-                    st.write(f"🟢 **Round {r}.{p}** | **{owner.capitalize()}** ➔ *{shared_draft['draft_history'][pick_num]}*")
-                elif pick_num == len(shared_draft["draft_history"]):
-                    st.markdown(f"🟠 **Round {r}.{p}** | **{owner.capitalize()}** ➔ `🤔 NOW PICKING...`")
-                else:
-                    st.write(f"⚪ Round {r}.{p} | {owner.capitalize()} ➔ ⏳ *Pending*")
+                        if r % 2 != 0:
+                            owner = shared_draft["draft_order"][p - 1]
+                        else:
+                            owner = shared_draft["draft_order"][total_teams - p]
+
+                        if pick_num < len(shared_draft["draft_history"]):
+                            st.write(
+                                f"🟢 **Round {r}.{p}** | **{owner.capitalize()}** ➔ *{shared_draft['draft_history'][pick_num]}*")
+                        elif pick_num == len(shared_draft["draft_history"]):
+                            st.markdown(f"🟠 **Round {r}.{p}** | **{owner.capitalize()}** ➔ `🤔 NOW PICKING...`")
+                        else:
+                            st.write(f"⚪ Round {r}.{p} | {owner.capitalize()} ➔ ⏳ *Pending*")
 
 elif option == "Teams":
     st.title("*TEAMS*")
