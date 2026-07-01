@@ -549,7 +549,38 @@ if option == "Start":
                 shared_draft["draft_mode"] = False
                 st.rerun()
         if shared_draft["draft_mode"]:
-            st.subheader("WEBSITE IS IN *DRAFT MODE* - Head to the 'Draft Room'")
+            st.subheader("WEBSITE IS IN *DRAFT MODE*")
+
+            # Dynamic Pick Position and Current Pick
+            if shared_draft["headliners_resolved"]:
+                # 1. Find their pick position
+                if username in shared_draft["draft_order"]:
+                    pick_pos = shared_draft["draft_order"].index(username) + 1
+                    st.subheader(f"Your pick position: **{pick_pos}**")
+                else:
+                    st.subheader(f"Your pick position: **N/A**")
+
+                # 2. Calculate the current round and pick on the clock
+                current_pick_idx = len(shared_draft.get("draft_history", []))
+                curr_r = (current_pick_idx // 7) + 1
+                curr_p = (current_pick_idx % 7) + 1
+                st.subheader(f"Current Round/Pick: **{curr_r}.{curr_p}**")
+            else:
+                # Fallback text while Headliners are still being picked
+                st.subheader("Your pick position: **TBD (Pending Headliners)**")
+                st.subheader("Current Round/Pick: **Phase 1**")
+
+            st.button("Trade pick position")
+
+            # Dynamic Team Overview
+            st.subheader("Your team: ")
+            user_roster = shared_draft["all_teams"].get(username, [])
+            if user_roster:
+                st.write(f"You currently have **{len(user_roster)}** players drafted.")
+            else:
+                st.write("No players drafted yet.")
+
+            st.button("Go to team")
 
     elif auth_status is False:
         st.error("Username or password is incorrect")
@@ -692,8 +723,6 @@ elif option == "Compare Players":
 
 elif option == "Draft Room":
     st.title("*DRAFT ROOM*")
-    st.subheader(f"Your pick position in the order: {shared_draft["draft_order"]}")
-    st.button("Trade pick position")
 
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
@@ -779,6 +808,13 @@ elif option == "Draft Room":
 
                 # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
                 elif shared_draft["headliners_resolved"]:
+                    if shared_draft["headliners_resolved"]:
+                        # 1. Find their pick position
+                        if username in shared_draft["draft_order"]:
+                            pick_pos = shared_draft["draft_order"].index(username) + 1
+                            st.subheader(f"Your pick position: **{pick_pos}**")
+                        else:
+                            st.subheader(f"Your pick position: **N/A**")
                     current_pick_idx = len(shared_draft["draft_history"])
                     total_teams = 7
                     total_rounds = 8  # CHANGED: Updated from 12 to 8 rounds
