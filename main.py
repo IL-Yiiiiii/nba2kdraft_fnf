@@ -862,6 +862,20 @@ elif option == "Draft Room":
             curr_r = (current_pick_idx // total_teams) + 1
             curr_p = (current_pick_idx % total_teams) + 1
 
+            # 📢 NEW: GLOBAL RECENT PICK ANNOUNCEMENT
+            if len(history) > 0:
+                prev_idx = current_pick_idx - 1
+                prev_r = (prev_idx // total_teams) + 1
+                prev_p = (prev_idx % total_teams) + 1
+                if prev_r % 2 != 0:
+                    prev_owner = shared_draft["draft_order"][prev_p - 1]
+                else:
+                    prev_owner = shared_draft["draft_order"][total_teams - prev_p]
+
+                st.success(f"📢 **LATEST DRAFT PICK:** **{prev_owner.capitalize()}** selected **{history[-1]}**!")
+
+            st.write("")
+
             if current_pick_idx < (total_teams * total_rounds):
                 if curr_r % 2 != 0:
                     current_owner = shared_draft["draft_order"][curr_p - 1]
@@ -870,6 +884,12 @@ elif option == "Draft Room":
 
                 st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}**")
                 if username == current_owner:
+                    # If the person looking at the screen is the person who is up to pick...
+                    # Make a bold red box so they can't miss it
+                    st.error("🚨 IT IS YOUR TURN! Head to the search tabs to claim a player.")
+
+                        # Trigger the pop-up notification
+                    st.toast(f"You are on the clock for Round {curr_r}.{curr_p}!", icon="⏰")
                     st.success("👉 It's your turn! Head to 'Search Players' to draft a player.")
             else:
                 st.balloons()
