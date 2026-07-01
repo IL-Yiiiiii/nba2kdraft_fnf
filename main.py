@@ -577,7 +577,7 @@ if option == "Start":
             st.subheader("Your team: ")
             user_roster = shared_draft["all_teams"].get(username, [])
             if user_roster:
-                st.write(f"You currently have **{len(user_roster)}** players drafted.")
+                st.write(f"You currently have **{len(user_roster)}** player(s) drafted.")
             else:
                 st.write("No players drafted yet.")
 
@@ -848,7 +848,7 @@ elif option == "Draft Room":
             st.subheader("Your team: ")
             user_roster = shared_draft["all_teams"].get(username, [])
             if user_roster:
-                st.write(f"You currently have **{len(user_roster)}** players drafted.")
+                st.write(f"You currently have **{len(user_roster)}** player(s) drafted.")
             else:
                 st.write("No players drafted yet.")
 
@@ -870,7 +870,7 @@ elif option == "Draft Room":
 
                 st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}**")
                 if username == current_owner:
-                    st.success("👉 It's your turn! Head to the search tabs to claim a player.")
+                    st.success("👉 It's your turn! Head to 'Search Players' to draft a player.")
             else:
                 st.balloons()
                 st.success("🎉 The draft is officially complete!")
