@@ -18,17 +18,27 @@ def load_draft_state():
             return pickle.load(f)
     return None
 
-# ==========================================
-# 1. UNIFIED SHARED_DRAFT INITIALIZATION
-# ==========================================
+# Look for a saved file on the server first
 saved_state = load_draft_state()
 
 if saved_state is not None:
     # Thaw out the existing draft data!
     shared_draft = saved_state
 else:
-    # If no backup exists, create the master dictionary
+    # If no file exists, ONLY THEN do you run your original initialization logic
     shared_draft = {
+        "draft_mode": False,
+        "headliners_resolved": False,
+        "headliner_picks": {},
+        "all_teams": {},
+        "draft_history": [],
+        # ... your other original setup keys ...
+    }
+
+st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
+@st.cache_resource
+def get_global_draft_store():
+    return {
         "initialized": False,
         "player_array": [],
         "t1_array": [],
@@ -38,12 +48,10 @@ else:
         "headliner_picks": {},
         "draft_order": [],
         "headliners_resolved": False,
-        "coin_flip_losers": [],
-        "draft_history": [],
-        "draft_mode": False
+        "coin_flip_losers": [], # <-- ADD THIS
+        "draft_history": []     # <-- ADD THIS
     }
-
-st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
+shared_draft = get_global_draft_store()
 
 class Player:
     def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
@@ -514,47 +522,31 @@ if not shared_draft["initialized"]:
     shared_draft["initialized"] = True
 # --------------------------------------
 option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
-username = st.session_state.get("username", "Guest")
-# =========================================================
-# 🚀 GLOBAL LIVE PICK & TURN NOTIFICATION SYSTEM
-# =========================================================
+if shared_draft["draft_mode"]:
+    username = st.session_state.get("username", "Guest")
+# ==========================================
+# GLOBAL ON-THE-CLOCK NOTIFICATION SYSTEM
+# ==========================================
+# Only trigger if the draft has actually started and headliners are resolved
 if shared_draft.get("draft_mode") and shared_draft.get("headliners_resolved"):
+
     history = shared_draft.get("draft_history", [])
     current_pick_idx = len(history)
-    total_teams, total_rounds = 7, 8
+    total_teams = 7
+    total_rounds = 8
 
-    # 🛑 1. TEMPORARY "JUST DRAFTED" POP-UP (Fires exactly once per new pick)
-    # Initialize the user's personal pick tracker if it doesn't exist yet
-    if "last_seen_pick_idx" not in st.session_state:
-        st.session_state["last_seen_pick_idx"] = current_pick_idx
-
-    # If the global history has grown, a new pick happened!
-    if current_pick_idx > st.session_state["last_seen_pick_idx"]:
-        prev_idx = current_pick_idx - 1
-        prev_r = (prev_idx // total_teams) + 1
-        prev_p = (prev_idx % total_teams) + 1
-
-        if prev_r % 2 != 0:
-            prev_owner = shared_draft["draft_order"][prev_p - 1]
-        else:
-            prev_owner = shared_draft["draft_order"][total_teams - prev_p]
-
-        # Fire the temporary alert
-        st.toast(f"🏃‍♂️ {prev_owner.capitalize()} just drafted {history[-1]}!", icon="🔥")
-
-        # Mark this pick as "seen" so it disappears on the next click/refresh
-        st.session_state["last_seen_pick_idx"] = current_pick_idx
-
-    # ⏰ 2. "YOU ARE ON THE CLOCK" POP-UP (Fires on every refresh while it's their turn)
+    # Ensure the draft isn't over yet
     if current_pick_idx < (total_teams * total_rounds):
         curr_r = (current_pick_idx // total_teams) + 1
         curr_p = (current_pick_idx % total_teams) + 1
 
+        # Calculate current owner using your snake draft math
         if curr_r % 2 != 0:
             current_owner = shared_draft["draft_order"][curr_p - 1]
         else:
             current_owner = shared_draft["draft_order"][total_teams - curr_p]
 
+        # If the viewer is the current owner, fire a toast on EVERY page refresh!
         if username == current_owner:
             st.toast(f"🚨 YOU ARE ON THE CLOCK! (Round {curr_r}.{curr_p})", icon="⏰")
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
@@ -614,14 +606,10 @@ if option == "Start":
         if name == "Isaac":
             if st.button("START DRAFT"):
                 shared_draft["draft_mode"] = True
-                save_draft_state(shared_draft)  # 💾 SAVE BEFORE RESTARTING!
                 st.rerun()
-
             if st.button("REVERT TO PRE-DRAFT MODE"):
                 shared_draft["draft_mode"] = False
-                save_draft_state(shared_draft)  # 💾 SAVE BEFORE RESTARTING!
                 st.rerun()
-
             if st.button("⚠️ EMERGENCY RESET ENTIRE DRAFT"):
                 if os.path.exists(DB_FILE):
                     os.remove(DB_FILE)
