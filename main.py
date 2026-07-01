@@ -1,4 +1,5 @@
 import copy, streamlit as st, pandas as pd, time
+import streamlit_authenticator as stauth
 
 class Player:
     def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
@@ -116,6 +117,25 @@ def display_player(player):
         with col_left:
             if player.pic != "":
                 st.image(player.pic)
+            if not draft_mode:
+                if st.button("Undo draft player", key=f"undo_button_{player.name}"):
+                    was_in_regular = any(p.name == player.name for p in st.session_state.drafted_player_array)
+                    was_in_t1 = any(p.name == player.name for p in st.session_state.drafted_t1_array)
+                    if was_in_regular:
+                        st.session_state.player_array.append(player.clone())
+                        st.session_state.player_array.sort(key=lambda x: int(x.rating), reverse=True)
+                    elif was_in_t1:
+                        st.session_state.t1_array.append(player.clone())
+                        st.session_state.t1_array.sort(key=lambda x: int(x.rating), reverse=True)
+                    st.session_state.your_team_array = [p for p in st.session_state.your_team_array if
+                                                         p.name != player.name]
+                    st.session_state.drafted_t1_array = [p for p in st.session_state.drafted_t1_array if
+                                                         p.name != player.name]
+                    st.session_state.drafted_player_array = [p for p in st.session_state.drafted_player_array if
+                                                             p.name != player.name]
+                    drafted_confirm = False
+                    st.session_state.pending_toast = {"message": f"You have undrafted {player.name}!", "icon": "🚫"}
+                    st.rerun()
         with col_right:
             st.subheader(f"Set: *{player.set}*")
             st.subheader(f"Height: *{player.ht}*")
@@ -135,9 +155,11 @@ def display_player(player):
                 if st.button("Draft Player", key=f"draft_button_{player.name}"):
                     already_drafted = any(p.name == player.name for p in st.session_state.your_team_array)
                     if not already_drafted:
-                        if player in st.session_state.player_array:
+                        in_regular = any(p.name == player.name for p in st.session_state.player_array)
+                        in_t1 = any(p.name == player.name for p in st.session_state.t1_array)
+                        if in_regular:
                             st.session_state.drafted_player_array.append(player.clone())
-                        elif player in st.session_state.t1_array:
+                        elif in_t1:
                             st.session_state.drafted_t1_array.append(player.clone())
                         st.session_state.your_team_array.append(player.clone())
                         st.session_state.player_array = [p for p in st.session_state.player_array if
@@ -150,7 +172,7 @@ def display_player(player):
             st.markdown(
                 f"""
                         <div style='background-color: #213d3b; padding: 10px; border-radius: 5px; 
-                        color: #8afffd; text-align: center; font-weight: italic;'>
+                        color: #8afffd; text-align: center; font-style: italic;'>
                         {player.name} added to compare!</div>
                         """,
                 unsafe_allow_html=True)
@@ -159,7 +181,7 @@ def display_player(player):
             st.markdown(
                 f"""
                     <div style='background-color: #3d421f; padding: 10px; border-radius: 5px; 
-                                color: #ffff8a; text-align: center; font-weight: italic;'>
+                                color: #ffff8a; text-align: center; font-style: italic;'>
                      {player.name} already added to compare!
                     </div>
                     """,
@@ -168,22 +190,15 @@ def display_player(player):
             st.markdown(
                 f"""
                     <div style='background-color: #421f1f; padding: 10px; border-radius: 5px; 
-                                color: #ff8a8a; text-align: center; font-weight: italic;'>
+                                color: #ff8a8a; text-align: center; font-style: italic;'>
                      {player.name} has already been drafted!</div>
                     </div>
                     """,
                 unsafe_allow_html=True)
         elif drafted_confirm:
-            st.markdown(
-                f"""
-                        <div style='background-color: #213d25; padding: 10px; border-radius: 5px; 
-                        color: #68e27b; text-align: center; font-weight: italic;'>
-                        You have drafted {player.name}!</div>
-                        """,
-                unsafe_allow_html=True)
-            st.toast(f"You have drafted {player.name}!", icon="🤝")
-            time.sleep(3) 
+            st.session_state.pending_toast = {"message": f"You have drafted {player.name}!", "icon": "🤝"}
             st.rerun()
+
         st.markdown("---")
         col_gap1, col_ats_title, col_gap2, col_stats_title1 = st.columns([0.6, 5.3, 1, 8])
         with col_ats_title:
@@ -373,6 +388,10 @@ if "t1_array" not in st.session_state:
     add_desc("txt/tier1desc.txt", temp_t1)
     st.session_state.t1_array = temp_t1
     add_pics("txt/tier1pics.txt", st.session_state.t1_array)
+if "pending_toast" in st.session_state:
+    st.toast(st.session_state.pending_toast["message"], icon=st.session_state.pending_toast["icon"])
+    del st.session_state.pending_toast
+draft_mode = False
 option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft", "Teams", "Trade Hub", "Results"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
@@ -399,7 +418,59 @@ with col_logo:
 if option == "Home":
     st.title("**:orange[Favourites]** *:red[&]* ***:blue[Future]***")
     st.write("Welcome to the draft website - Please use the sidebar to navigate to different features.")
-    st.subheader("*UNDER CONSTRUCTION!*")
+    #Login part
+    credentials = {"usernames": {}}
+    for uname, info in st.secrets["credentials"]["usernames"].items():
+        credentials["usernames"][uname] = {
+            "name": info["name"],
+            "password": info["password"],  # already hashed, see below
+        }
+
+    authenticator = stauth.Authenticate(
+        credentials,
+        st.secrets["cookie"]["name"],
+        st.secrets["cookie"]["key"],
+        st.secrets["cookie"]["expiry_days"],
+        auto_hash=False,  # important: our passwords are already hashed, don't re-hash them
+    )
+
+    authenticator.login(location="main")
+
+    auth_status = st.session_state.get("authentication_status")
+    name = st.session_state.get("name")
+    username = st.session_state.get("username")
+
+    if auth_status:
+        st.subheader(f"*Logged in as:* **{name}**")
+        authenticator.logout("**LOG OUT**", "main")
+        st.divider()
+        if not draft_mode:
+            st.subheader("**Website currently in pre-draft mode**")
+            st.write("You can look at players and build teams")
+        if name == "IL":
+            if st.button("START DRAFT"):
+                draft_mode = True
+                st.rerun()
+        if draft_mode:
+            st.subheader("WEBSITE IS IN *DRAFT MODE*")
+            st.subheader("Your pick position: ")
+            st.button("Trade pick position")
+            st.subheader("Current Round/Pick: ")
+            st.subheader("Your team: ")
+            st.write("[Placeholder for team display]")
+            st.button("Go to team")
+
+        # current_pick_team = get_whose_turn_it_is(st.session_state.get("picks_made", 0))
+        # if username == current_pick_team:
+        # st.success("It's your turn to pick!")
+        # else:
+        # st.info(f"Waiting on {current_pick_team} to pick...")
+
+    elif auth_status is False:
+        st.error("Username or password is incorrect")
+    elif auth_status is None:
+        st.warning("Please enter your username and password")
+    # Login ends here
 
 elif option == "Guide":
     st.title("***GUIDE***")
@@ -533,7 +604,6 @@ elif option == "Compare Players":
 
 elif option == "Draft":
     st.title("*DRAFT*")
-    st.subheader("*UNDER CONSTRUCTION!*")
 
 elif option == "Teams":
     st.title("*TEAMS*")
@@ -541,12 +611,21 @@ elif option == "Teams":
     if st.session_state.your_team_array:
         for i in range(len(st.session_state.your_team_array)):
             display_player(st.session_state.your_team_array[i])
-    st.subheader("*OTHER TEAMS:*")
-    st.subheader("*UNDER CONSTRUCTION!*")
+    if not draft_mode:
+        st.subheader("*THIS PAGE WILL CHANGE IN DRAFT MODE!*")
+    if draft_mode:
+        st.subheader("*OTHER TEAMS:*")
+        st.write(f"[insert here]'s team")
+        st.write(f"[insert here]'s team")
+        st.write(f"[insert here]'s team")
+        st.write(f"[insert here]'s team")
+        st.write(f"[insert here]'s team")
+        st.write(f"[insert here]'s team")
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
-    st.subheader("*UNDER CONSTRUCTION!*")
+    if not draft_mode:
+        st.subheader("**Will open in draft mode!**")
 
 elif option == "Results":
     st.title("*RESULTS*")
