@@ -707,7 +707,7 @@ elif option == "Draft Room":
 
             if username in shared_draft["coin_flip_losers"]:
                 st.error(
-                    "❌ YOU LOST THE COIN FLIP! Your choice was taken. Head back to the Headliners tab and pick a remaining player!")
+                    "❌ YOU LOST THE RANDOMIZER! Your choice was taken. Head back to the Headliners tab and pick a remaining player!")
             elif username in shared_draft["headliner_picks"]:
                 st.success(
                     f"✅ You have securely submitted your choice: **{shared_draft['headliner_picks'][username]}**")
