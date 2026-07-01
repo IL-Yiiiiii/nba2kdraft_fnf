@@ -5,6 +5,9 @@ import os
 import pickle
 
 DB_FILE = "draft_backup.pkl"
+# ⚠️ TEMPORARY FIX: DELETE THIS BLOCK AFTER IT RUNS SUCCESSFULLY ONCE
+if os.path.exists("draft_backup.pkl"):
+    os.remove("draft_backup.pkl")
 
 def save_draft_state(state_dict):
     """Saves the current shared_draft state to a physical file."""
@@ -762,6 +765,9 @@ elif option == "Draft Room":
 
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
+
+    else:
+        username = st.session_state.get("username", "Guest")
 
         # --- PHASE 1 DISPLAY: WAITING ON BLIND HEADLINERS ---
         if not shared_draft["headliners_resolved"]:
