@@ -696,7 +696,7 @@ elif option == "Compare Players":
     load_to_df(st.session_state.compare_array)
     st.dataframe(st.session_state.compare_df.T, width='stretch')
 
-elif option == "Draft":
+elif option == "Draft Room":
     st.title("*DRAFT ROOM*")
 
     if not shared_draft["draft_mode"]:
