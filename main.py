@@ -796,9 +796,9 @@ elif option == "Draft Room":
                 else:
                     current_owner = shared_draft["draft_order"][total_teams - curr_p]
 
-                st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}** -> Go to 'Search Players' and pick one!")
+                st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}**")
                 if username == current_owner:
-                    st.success("👉 It's your turn! Head to the search tabs to claim a player.")
+                    st.success("👉 It's your turn! Head to 'Search Players' and pick one!")
             else:
                 st.balloons()
                 st.success("🎉 The draft is officially complete!")
