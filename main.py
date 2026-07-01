@@ -5,7 +5,8 @@ import os
 import pickle
 
 DB_FILE = "draft_backup.pkl"
-
+if os.path.exists("draft_backup.pkl"):
+    os.remove("draft_backup.pkl")
 def save_draft_state(state_dict):
     """Saves the current shared_draft state to a physical file."""
     with open(DB_FILE, "wb") as f:
@@ -37,20 +38,8 @@ if saved_state is not None:
     # Thaw out the existing draft data!
     shared_draft = saved_state
 else:
-    # If no file exists, ONLY THEN do you run your original initialization logic
+    # If no file exists, create a fresh master dictionary
     shared_draft = {
-        "draft_mode": False,
-        "headliners_resolved": False,
-        "headliner_picks": {},
-        "all_teams": {},
-        "draft_history": [],
-        # ... your other original setup keys ...
-    }
-
-st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
-@st.cache_resource
-def get_global_draft_store():
-    return {
         "initialized": False,
         "player_array": [],
         "t1_array": [],
@@ -60,10 +49,12 @@ def get_global_draft_store():
         "headliner_picks": {},
         "draft_order": [],
         "headliners_resolved": False,
-        "coin_flip_losers": [], # <-- ADD THIS
-        "draft_history": []     # <-- ADD THIS
+        "coin_flip_losers": [],
+        "draft_history": [],
+        "draft_mode": False
     }
-shared_draft = get_global_draft_store()
+
+st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
 
 class Player:
     def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
@@ -836,6 +827,7 @@ elif option == "Draft Room":
 
                     if len(losers_this_round) > 0:
                         shared_draft["coin_flip_losers"] = losers_this_round
+                        save_draft_state(shared_draft)
                     else:
                         # Clean finish! Separate and shuffle 98s vs 99s
                         shared_draft["headliners_resolved"] = True
