@@ -807,17 +807,14 @@ elif option == "Draft Room":
                     st.rerun()
 
                 # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
-                elif shared_draft["headliners_resolved"]:
-                    if shared_draft["headliners_resolved"]:
-                        # 1. Find their pick position
-                        if username in shared_draft["draft_order"]:
-                            pick_pos = shared_draft["draft_order"].index(username) + 1
-                            st.subheader(f"Your pick position: **{pick_pos}**")
-                        else:
-                            st.subheader(f"Your pick position: **N/A**")
-                    current_pick_idx = len(shared_draft["draft_history"])
+                    # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
+                    elif shared_draft["headliners_resolved"]:
+                    # Safely grab history so it never KeyErrors!
+                    history = shared_draft.get("draft_history", [])
+                    current_pick_idx = len(history)
+
                     total_teams = 7
-                    total_rounds = 8  # CHANGED: Updated from 12 to 8 rounds
+                    total_rounds = 8
 
                     curr_r = (current_pick_idx // total_teams) + 1
                     curr_p = (current_pick_idx % total_teams) + 1
@@ -835,19 +832,16 @@ elif option == "Draft Room":
                         st.balloons()
                         st.success("🎉 The draft is officially complete!")
 
-                    # ADDED: Persistent display of Headliner Picks
                     st.write("")
                     with st.expander("👑 View Phase 1: Headliner Selections", expanded=False):
                         for team_owner, roster in shared_draft["all_teams"].items():
                             if roster:
-                                # The first player in their roster list is always their Headliner pick
                                 st.write(
                                     f"- **{team_owner.capitalize()}** secured: *{roster[0].name} ({roster[0].rating} OVR)*")
 
                     st.divider()
                     st.subheader("📋 Draft Progress Board")
 
-                    # Print the entire serpentine map dynamically
                     for pick_num in range(total_rounds * total_teams):
                         r = (pick_num // total_teams) + 1
                         p = (pick_num % total_teams) + 1
@@ -857,10 +851,9 @@ elif option == "Draft Room":
                         else:
                             owner = shared_draft["draft_order"][total_teams - p]
 
-                        if pick_num < len(shared_draft["draft_history"]):
-                            st.write(
-                                f"🟢 **Round {r}.{p}** | **{owner.capitalize()}** ➔ *{shared_draft['draft_history'][pick_num]}*")
-                        elif pick_num == len(shared_draft["draft_history"]):
+                        if pick_num < len(history):
+                            st.write(f"🟢 **Round {r}.{p}** | **{owner.capitalize()}** ➔ *{history[pick_num]}*")
+                        elif pick_num == len(history):
                             st.markdown(f"🟠 **Round {r}.{p}** | **{owner.capitalize()}** ➔ `🤔 NOW PICKING...`")
                         else:
                             st.write(f"⚪ Round {r}.{p} | {owner.capitalize()} ➔ ⏳ *Pending*")
