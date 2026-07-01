@@ -465,7 +465,7 @@ if option == "Home":
         if not shared_draft["draft_mode"]:
             st.subheader("**Website currently in pre-draft mode**")
             st.write("You can look at players and build teams")
-        if name == "IL":
+        if name == "Isaac":
             if st.button("START DRAFT"):
                 shared_draft["draft_mode"] = True
                 st.rerun()
