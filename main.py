@@ -658,8 +658,7 @@ elif option == "Teams":
         else:
             # 3. Loop through the filtered opponents
             for team_owner, roster in other_teams.items():
-                upper_version = team_owner.upper()
-                with st.expander(f"{team_owner.upper()}'s Team ({len(roster)} players)"):
+                with st.expander(f"{team_owner.upper()[0] + team_owner[0:]}'s Team ({len(roster)} players)"):
                     if not roster:
                         st.write(f"*{team_owner} hasn't drafted anyone yet.*")
                     else:
