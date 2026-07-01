@@ -543,7 +543,7 @@ if option == "Home":
                 shared_draft["draft_mode"] = False
                 st.rerun()
         if shared_draft["draft_mode"]:
-            st.subheader("WEBSITE IS IN *DRAFT MODE*")
+            st.subheader("WEBSITE IS IN *DRAFT MODE* - Head to 'Headliner Players' to pick your 99 or 98")
             st.subheader("Your pick position: ")
             st.button("Trade pick position")
             st.subheader("Current Round/Pick: ")
