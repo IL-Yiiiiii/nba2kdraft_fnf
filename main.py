@@ -16,11 +16,11 @@ def save_draft_state(state_dict):
     try:
         with open(tmp_file, "wb") as f:
             pickle.dump(state_dict, f)
-        # 🔑 THE FIX: Instantly swaps the temp file with the real one.
-        # No more 0-byte truncation states for auto-refresh to trip over!
         os.replace(tmp_file, DB_FILE)
+        return True   # 👈 Tells the app the save worked
     except Exception as e:
         st.error(f"💾 Failed to save draft state: {e}")
+        return False  # 👈 Tells the app to halt so you can see the error
 
 def load_draft_state():
     """Loads the draft state from the file safely, preventing silent resets."""
@@ -280,18 +280,26 @@ def display_player(player):
                                                               "icon": "🎯"}
                             st.rerun()
 
-                        # --- PHASE 2: LIVE SERPENTINE DRAFT ---
+                         # --- PHASE 2: LIVE SERPENTINE DRAFT ---
                         elif shared_draft["draft_mode"] and shared_draft["headliners_resolved"]:
-                            # Safe fallback in case draft_history isn't initialized yet
-                            current_pick_idx = len(shared_draft.get("draft_history", []))
-                            curr_r = (current_pick_idx // 7) + 1
-                            curr_p = (current_pick_idx % 7) + 1
+                            draft_order_list = shared_draft.get("draft_order", [])
+                            total_teams = len(draft_order_list)
 
-                            # Determine current turn owner
+                            # Defensive Check: Is the order actually set up?
+                            if total_teams == 0:
+                                st.error("🚨 The Draft Order hasn't been set up yet! It's currently empty.")
+                                st.stop()
+
+                            # Safe turn calculation based on actual team count
+                            current_pick_idx = len(shared_draft.get("draft_history", []))
+                            curr_r = (current_pick_idx // total_teams) + 1
+                            curr_p = (current_pick_idx % total_teams) + 1
+
+                            # Serpentine math
                             if curr_r % 2 != 0:
-                                current_owner = shared_draft["draft_order"][curr_p - 1]
+                                current_owner = draft_order_list[curr_p - 1]
                             else:
-                                current_owner = shared_draft["draft_order"][7 - curr_p]
+                                current_owner = draft_order_list[total_teams - curr_p]
 
                             if username != current_owner:
                                 st.error(f"⚠️ Out of turn! It is currently {current_owner}'s choice.")
@@ -320,7 +328,7 @@ def display_player(player):
                                 shared_draft["draft_history"] = []
                             shared_draft["draft_history"].append(f"{player.name} ({player.rating} OVR)")
 
-                            drafted_confirm = True  # Triggers your original success logic
+                            drafted_confirm = True
 
                 # HTML/Toast warning rendering remains the same...
                 if added_confirm:
@@ -337,15 +345,17 @@ def display_player(player):
                         f"<div style='background-color: #421f1f; padding: 10px; border-radius: 5px; color: #ff8a8a; text-align: center; font-style: italic;'>{player.name} has already been drafted!</div>",
                         unsafe_allow_html=True)
                 elif drafted_confirm:
-                    # CHANGED: Custom dynamic message depending on draft mode
+                    # Custom dynamic message depending on draft mode
                     if shared_draft["draft_mode"] and shared_draft["headliners_resolved"]:
                         msg = f"📢 {username.capitalize()} has drafted {player.name}!"
                     else:
                         msg = f"You have drafted {player.name}!"
 
                     st.session_state.pending_toast = {"message": msg, "icon": "🤝"}
-                    save_draft_state(shared_draft)
-                    st.rerun()
+
+                    # 💾 ONLY RERUN IF THE SAVE WAS SUCCESSFUL
+                    if save_draft_state(shared_draft):
+                        st.rerun()
 
         # Attribute and Stats layout section remains unchanged below this...
         st.markdown("---")
