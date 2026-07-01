@@ -550,6 +550,7 @@ if option == "Start":
                 st.rerun()
         if shared_draft["draft_mode"]:
             st.subheader("WEBSITE IS IN *DRAFT MODE*")
+            st.divider()
 
             # Dynamic Pick Position and Current Pick
             if shared_draft["headliners_resolved"]:
