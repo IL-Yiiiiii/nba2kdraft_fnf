@@ -1,5 +1,18 @@
 import copy, streamlit as st, pandas as pd
 import streamlit_authenticator as stauth
+from streamlit_autorefresh import st_autorefresh
+st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
+@st.cache_resource
+def get_global_draft_store():
+    return {
+        "initialized": False,
+        "player_array": [],
+        "t1_array": [],
+        "drafted_player_array": [],
+        "drafted_t1_array": [],
+        "all_teams": {}  # Structure: {"username_1": [player1, player2], "username_2": []}
+    }
+shared_draft = get_global_draft_store()
 
 class Player:
     def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
@@ -104,6 +117,7 @@ def load(file, array):
     except FileNotFoundError:
         print("File not found")
 
+
 def display_player(player):
     added_confirm = False
     added_already = False
@@ -112,27 +126,38 @@ def display_player(player):
     secondary = ""
     if player.secondary_pos != "":
         secondary = "/" + player.secondary_pos
+
+    # Grab the logged-in username for roster mapping
+    username = st.session_state.get("username", "Guest")
+
     with st.expander(f"***{player.name}*** [{player.rating} - {player.primary_pos}{secondary}]"):
-        col_gap1, col_left, col_gap2, col_right, col_gap3 = st.columns([0.5,5,1,7.5,0.5])
+        col_gap1, col_left, col_gap2, col_right, col_gap3 = st.columns([0.5, 5, 1, 7.5, 0.5])
         with col_left:
             if player.pic != "":
                 st.image(player.pic)
-            if not st.session_state.draft_mode:
+            # Global check for draft mode
+            if not shared_draft["draft_mode"]:
                 if st.button("Undo draft player", key=f"undo_button_{player.name}"):
-                    was_in_regular = any(p.name == player.name for p in st.session_state.drafted_player_array)
-                    was_in_t1 = any(p.name == player.name for p in st.session_state.drafted_t1_array)
+                    was_in_regular = any(p.name == player.name for p in shared_draft["drafted_player_array"])
+                    was_in_t1 = any(p.name == player.name for p in shared_draft["drafted_t1_array"])
+
                     if was_in_regular:
-                        st.session_state.player_array.append(player.clone())
-                        st.session_state.player_array.sort(key=lambda x: int(x.rating), reverse=True)
+                        shared_draft["player_array"].append(player.clone())
+                        shared_draft["player_array"].sort(key=lambda x: int(x.rating), reverse=True)
                     elif was_in_t1:
-                        st.session_state.t1_array.append(player.clone())
-                        st.session_state.t1_array.sort(key=lambda x: int(x.rating), reverse=True)
-                    st.session_state.your_team_array = [p for p in st.session_state.your_team_array if
-                                                         p.name != player.name]
-                    st.session_state.drafted_t1_array = [p for p in st.session_state.drafted_t1_array if
-                                                         p.name != player.name]
-                    st.session_state.drafted_player_array = [p for p in st.session_state.drafted_player_array if
-                                                             p.name != player.name]
+                        shared_draft["t1_array"].append(player.clone())
+                        shared_draft["t1_array"].sort(key=lambda x: int(x.rating), reverse=True)
+
+                    # Remove from whichever team owned them globally
+                    for team_owner in shared_draft["all_teams"]:
+                        shared_draft["all_teams"][team_owner] = [p for p in shared_draft["all_teams"][team_owner] if
+                                                                 p.name != player.name]
+
+                    shared_draft["drafted_t1_array"] = [p for p in shared_draft["drafted_t1_array"] if
+                                                        p.name != player.name]
+                    shared_draft["drafted_player_array"] = [p for p in shared_draft["drafted_player_array"] if
+                                                            p.name != player.name]
+
                     drafted_confirm = False
                     st.session_state.pending_toast = {"message": f"You have undrafted {player.name}!", "icon": "🚫"}
                     st.rerun()
@@ -142,7 +167,7 @@ def display_player(player):
             st.subheader(f"Weight: *{player.wt}*")
             st.write("")
             st.write(player.desc)
-            col_compare, col_draft = st.columns([1,1])
+            col_compare, col_draft = st.columns([1, 1])
             with col_compare:
                 if st.button("Compare Player", key=f"compare_button_{player.name}"):
                     already_added = any(p.name == player.name for p in st.session_state.compare_array)
@@ -153,67 +178,58 @@ def display_player(player):
                         added_already = True
             with col_draft:
                 if st.button("Draft Player", key=f"draft_button_{player.name}"):
-                    already_drafted = any(p.name == player.name for p in st.session_state.your_team_array)
+                    # Check if already drafted globally by anyone
+                    already_drafted = (any(p.name == player.name for p in shared_draft["drafted_player_array"]) or
+                                       any(p.name == player.name for p in shared_draft["drafted_t1_array"]))
+
                     if not already_drafted:
-                        in_regular = any(p.name == player.name for p in st.session_state.player_array)
-                        in_t1 = any(p.name == player.name for p in st.session_state.t1_array)
+                        in_regular = any(p.name == player.name for p in shared_draft["player_array"])
+                        in_t1 = any(p.name == player.name for p in shared_draft["t1_array"])
+
                         if in_regular:
-                            st.session_state.drafted_player_array.append(player.clone())
+                            shared_draft["drafted_player_array"].append(player.clone())
+                            shared_draft["player_array"] = [p for p in shared_draft["player_array"] if
+                                                            p.name != player.name]
                         elif in_t1:
-                            st.session_state.drafted_t1_array.append(player.clone())
-                        st.session_state.your_team_array.append(player.clone())
-                        st.session_state.player_array = [p for p in st.session_state.player_array if
-                                                         p.name != player.name]
-                        st.session_state.t1_array = [p for p in st.session_state.t1_array if p.name != player.name]
+                            shared_draft["drafted_t1_array"].append(player.clone())
+                            shared_draft["t1_array"] = [p for p in shared_draft["t1_array"] if p.name != player.name]
+
+                        # Add to the active user's global team dictionary entry
+                        if username not in shared_draft["all_teams"]:
+                            shared_draft["all_teams"][username] = []
+                        shared_draft["all_teams"][username].append(player.clone())
+                        shared_draft["all_teams"][username].sort(key=lambda x: int(x.rating), reverse=True)
+
                         drafted_confirm = True
                     else:
                         drafted_already = True
+        # HTML/Toast warning rendering remains the same...
         if added_confirm:
             st.markdown(
-                f"""
-                        <div style='background-color: #213d3b; padding: 10px; border-radius: 5px; 
-                        color: #8afffd; text-align: center; font-style: italic;'>
-                        {player.name} added to compare!</div>
-                        """,
+                f"<div style='background-color: #213d3b; padding: 10px; border-radius: 5px; color: #8afffd; text-align: center; font-style: italic;'>{player.name} added to compare!</div>",
                 unsafe_allow_html=True)
             st.toast(f"{player.name} added to compare!", icon="⚖️")
         elif added_already:
             st.markdown(
-                f"""
-                    <div style='background-color: #3d421f; padding: 10px; border-radius: 5px; 
-                                color: #ffff8a; text-align: center; font-style: italic;'>
-                     {player.name} already added to compare!
-                    </div>
-                    """,
+                f"<div style='background-color: #3d421f; padding: 10px; border-radius: 5px; color: #ffff8a; text-align: center; font-style: italic;'>{player.name} already added to compare!</div>",
                 unsafe_allow_html=True)
         if drafted_already:
             st.markdown(
-                f"""
-                    <div style='background-color: #421f1f; padding: 10px; border-radius: 5px; 
-                                color: #ff8a8a; text-align: center; font-style: italic;'>
-                     {player.name} has already been drafted!</div>
-                    </div>
-                    """,
+                f"<div style='background-color: #421f1f; padding: 10px; border-radius: 5px; color: #ff8a8a; text-align: center; font-style: italic;'>{player.name} has already been drafted!</div>",
                 unsafe_allow_html=True)
         elif drafted_confirm:
             st.session_state.pending_toast = {"message": f"You have drafted {player.name}!", "icon": "🤝"}
             st.rerun()
 
+        # Attribute and Stats layout section remains unchanged below this...
         st.markdown("---")
         col_gap1, col_ats_title, col_gap2, col_stats_title1 = st.columns([0.6, 5.3, 1, 8])
         with col_ats_title:
             st.subheader(f"Attributes:")
         with col_gap2:
-            st.markdown("""
-                              <div style="
-                                  border-left: 2px solid #3c4044;
-                                  height: 100%;
-                                  min-height: 62px;
-                                  margin: 0 auto;
-                                  display: block;
-                                  width: 2px;
-                              "></div>
-                          """, unsafe_allow_html=True)
+            st.markdown(
+                """<div style="border-left: 2px solid #3c4044; height: 100%; min-height: 62px; margin: 0 auto; display: block; width: 2px;"></div>""",
+                unsafe_allow_html=True)
         with col_stats_title1:
             st.subheader(f"Stats & Splits:")
         col_gap1, col_ats, col_gap2, col_stats1, col_stats2, col_stats3 = st.columns([1, 8, 2, 4, 4, 4])
@@ -227,16 +243,9 @@ def display_player(player):
             st.write(f"**Rebounding: {colour_grade(player.reb)}**")
             st.write(f"**Athleticism: {colour_grade(player.ath)}**")
         with col_gap2:
-            st.markdown("""
-                <div style="
-                    border-left: 2px solid #3c4044;
-                    height: 100%;
-                    min-height: 325px;
-                    margin: 0 auto;
-                    display: block;
-                    width: 2px;
-                "></div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                """<div style="border-left: 2px solid #3c4044; height: 100%; min-height: 325px; margin: 0 auto; display: block; width: 2px;"></div>""",
+                unsafe_allow_html=True)
         with col_stats1:
             st.metric(f"**PPG**", player.ppg)
             st.metric(f"**MPG**", player.mpg)
@@ -289,8 +298,8 @@ def colour_grade(grade):
     return new
 
 def display_t1():
-    for i in range(len(st.session_state.t1_array)):
-        display_player(st.session_state.t1_array[i])
+    for i in range(len(shared_draft["t1_array"])):
+        display_player(shared_draft["t1_array"][i])
 
 def check_playstyles(player, pstyle_choice):
     if pstyle_choice == "None":
@@ -367,34 +376,41 @@ def reset():
     st.session_state.min_a_choice = "F"
 
 #MAIN STARTS HERE
+# --- LOCAL STORAGE (Individual User UI Views) ---
+# These are unique to whoever is looking at the screen right now
 if "compare_array" not in st.session_state:
     st.session_state.compare_array = []
 if "compare_df" not in st.session_state:
     st.session_state.compare_df = pd.DataFrame()
-if "your_team_array" not in st.session_state:
-    st.session_state.your_team_array = []
-if "drafted_player_array" not in st.session_state:
-    st.session_state.drafted_player_array = []
-if "drafted_t1_array" not in st.session_state:
-    st.session_state.drafted_t1_array = []
-if "player_array" not in st.session_state:
-    temp_players = []
-    load("txt/players.txt", temp_players)
-    add_desc("txt/players_desc.txt", temp_players)
-    st.session_state.player_array = temp_players
-    add_pics("txt/playerspics.txt", st.session_state.player_array)
-if "t1_array" not in st.session_state:
-    temp_t1 = []
-    load("txt/tier1.txt", temp_t1)
-    add_desc("txt/tier1desc.txt", temp_t1)
-    st.session_state.t1_array = temp_t1
-    add_pics("txt/tier1pics.txt", st.session_state.t1_array)
 if "pending_toast" in st.session_state:
     st.toast(st.session_state.pending_toast["message"], icon=st.session_state.pending_toast["icon"])
     del st.session_state.pending_toast
-if "draft_mode" not in st.session_state:
-    st.session_state.draft_mode = False
-option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft", "Teams", "Trade Hub", "Results"])
+
+# --- GLOBAL STORAGE (Shared Across All Devices) ---
+# This block runs EXACTLY ONCE when the first person boots up the website
+if not shared_draft["initialized"]:
+    # 1. Load available player pools from text files
+    temp_players = []
+    load("txt/players.txt", temp_players)
+    add_desc("txt/players_desc.txt", temp_players)
+    shared_draft["player_array"] = temp_players
+    add_pics("txt/playerspics.txt", shared_draft["player_array"])
+    temp_t1 = []
+    load("txt/tier1.txt", temp_t1)
+    add_desc("txt/tier1desc.txt", temp_t1)
+    shared_draft["t1_array"] = temp_t1
+    add_pics("txt/tier1pics.txt", shared_draft["t1_array"])
+    # 2. Initialize empty global draft tracking lists
+    shared_draft["drafted_player_array"] = []
+    shared_draft["drafted_t1_array"] = []
+    # 3. Initialize multi-user team rosters & draft mechanics
+    shared_draft["all_teams"] = {}
+    shared_draft["picks_made"] = 0
+    shared_draft["draft_mode"] = False
+    # Flip the master switch so the server remembers this data is ready
+    shared_draft["initialized"] = True
+# --------------------------------------
+option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Teams", "Trade Hub", "Draft", "Results"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
 if st.sidebar.button("***:rainbow[Send snowflakes!]***"):
@@ -446,17 +462,17 @@ if option == "Home":
         st.subheader(f"*Logged in as:* **{name}**")
         authenticator.logout("**LOG OUT**", "main")
         st.divider()
-        if not st.session_state.draft_mode:
+        if not shared_draft["draft_mode"]:
             st.subheader("**Website currently in pre-draft mode**")
             st.write("You can look at players and build teams")
         if name == "IL":
             if st.button("START DRAFT"):
-                st.session_state.draft_mode = True
+                shared_draft["draft_mode"] = True
                 st.rerun()
             if st.button("REVERT TO PRE-DRAFT MODE"):
-                st.session_state.draft_mode = False
+                shared_draft["draft_mode"] = False
                 st.rerun()
-        if st.session_state.draft_mode:
+        if shared_draft["draft_mode"]:
             st.subheader("WEBSITE IS IN *DRAFT MODE*")
             st.subheader("Your pick position: ")
             st.button("Trade pick position")
@@ -528,9 +544,9 @@ elif option == "Headliner Players":
     st.header("*:green[UNDRAFTED]*")
     display_t1()
     st.header("*:red[DRAFTED]*")
-    if st.session_state.drafted_t1_array:
-        for i in range(len(st.session_state.drafted_t1_array)):
-            display_player(st.session_state.drafted_t1_array[i])
+    if shared_draft["drafted_t1_array"]:
+        for i in range(len(shared_draft["drafted_t1_array"])):
+            display_player(shared_draft["drafted_t1_array"][i])
 
 elif option == "Search Players":
     st.title("*PLAYER SEARCH*")
@@ -554,14 +570,16 @@ elif option == "Search Players":
         min_grade_select = st.select_slider("Min Attribute Grade:",["F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S"], key="min_a_choice")
     st.markdown("---")
     st.header("*:green[UNDRAFTED]*")
-    for i in range(len(st.session_state.player_array)):
-        if check_playstyles(st.session_state.player_array[i], playstyle_select) and check_attribute(st.session_state.player_array[i], attribute_select, min_grade_select, max_grade_select, make_attribute_dict()) and check_position(st.session_state.player_array[i], pos_filter, sec_allowed):
-            display_player(st.session_state.player_array[i])
+    for i in range(len(shared_draft["player_array"])):
+        if check_playstyles(shared_draft["player_array"][i], playstyle_select) and check_attribute(
+                shared_draft["player_array"][i], attribute_select, min_grade_select, max_grade_select,
+                make_attribute_dict()) and check_position(shared_draft["player_array"][i], pos_filter, sec_allowed):
+            display_player(shared_draft["player_array"][i])
     st.markdown("---")
     st.header("*:red[DRAFTED]*")
-    if st.session_state.drafted_player_array:
-        for i in range(len(st.session_state.drafted_player_array)):
-            display_player(st.session_state.drafted_player_array[i])
+    if shared_draft["drafted_player_array"]:
+        for i in range(len(shared_draft["drafted_player_array"])):
+            display_player(shared_draft["drafted_player_array"][i])
 
 elif option == "Compare Players":
     st.title("*COMPARE PLAYERS*")
@@ -613,23 +631,43 @@ elif option == "Draft":
 elif option == "Teams":
     st.title("*TEAMS*")
     st.subheader("*YOUR TEAM:*")
-    if st.session_state.your_team_array:
-        for i in range(len(st.session_state.your_team_array)):
-            display_player(st.session_state.your_team_array[i])
-    if not st.session_state.draft_mode:
+
+    username = st.session_state.get("username", "Guest")
+    user_team = shared_draft["all_teams"].get(username, [])
+
+    if user_team:
+        st.write(f"Player Count: {len(user_team)}")
+        for i in range(len(user_team)):
+            display_player(user_team[i])
+    else:
+        st.write("You haven't drafted any players yet!")
+
+    if not shared_draft["draft_mode"]:
+        st.divider()
         st.subheader("*THIS PAGE WILL CHANGE IN DRAFT MODE!*")
-    if st.session_state.draft_mode:
+    if shared_draft["draft_mode"]:
+        st.divider()
         st.subheader("*OTHER TEAMS:*")
-        st.write(f"[insert here]'s team")
-        st.write(f"[insert here]'s team")
-        st.write(f"[insert here]'s team")
-        st.write(f"[insert here]'s team")
-        st.write(f"[insert here]'s team")
-        st.write(f"[insert here]'s team")
+
+        # 1. Filter the dictionary to ONLY include opponents
+        other_teams = {owner: roster for owner, roster in shared_draft["all_teams"].items() if owner != username}
+
+        # 2. Check if the opponent list is empty
+        if not other_teams:
+            st.write("No one else has drafted any players yet!")
+        else:
+            # 3. Loop through the filtered opponents
+            for team_owner, roster in other_teams.items():
+                with st.expander(f"🏀 {team_owner}'s Team ({len(roster)} players)"):
+                    if not roster:
+                        st.write(f"*{team_owner} hasn't drafted anyone yet.*")
+                    else:
+                        for player in roster:
+                            display_player(player)
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
-    if not st.session_state.draft_mode:
+    if not shared_draft["draft_mode"]:
         st.subheader("**Will open in draft mode!**")
 
 elif option == "Results":
