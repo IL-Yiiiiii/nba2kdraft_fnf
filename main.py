@@ -763,6 +763,9 @@ elif option == "Draft Room":
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
 
+    else:
+        username = st.session_state.get("username", "Guest")
+
         # --- PHASE 1 DISPLAY: WAITING ON BLIND HEADLINERS ---
         if not shared_draft["headliners_resolved"]:
             st.subheader("🎯 Phase 1: Headliner Submission Status")
