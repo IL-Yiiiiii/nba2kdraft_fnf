@@ -822,6 +822,36 @@ elif option == "Draft Room":
         # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
         # MOVED: Properly aligned with Phase 1 out of the loop
         elif shared_draft["headliners_resolved"]:
+            # Dynamic Pick Position and Current Pick
+            if shared_draft["headliners_resolved"]:
+                # 1. Find their pick position
+                if username in shared_draft["draft_order"]:
+                    pick_pos = shared_draft["draft_order"].index(username) + 1
+                    st.subheader(f"Your pick position: **{pick_pos}**")
+                else:
+                    st.subheader(f"Your pick position: **N/A**")
+
+                # 2. Calculate the current round and pick on the clock
+                current_pick_idx = len(shared_draft.get("draft_history", []))
+                curr_r = (current_pick_idx // 7) + 1
+                curr_p = (current_pick_idx % 7) + 1
+                st.subheader(f"Current Round/Pick: **{curr_r}.{curr_p}**")
+            else:
+                # Fallback text while Headliners are still being picked
+                st.subheader("Your pick position: **TBD (Pending Headliners)**")
+                st.subheader("Current Round/Pick: **Phase 1**")
+
+            st.button("Trade pick position")
+
+            # Dynamic Team Overview
+            st.subheader("Your team: ")
+            user_roster = shared_draft["all_teams"].get(username, [])
+            if user_roster:
+                st.write(f"You currently have **{len(user_roster)}** players drafted.")
+            else:
+                st.write("No players drafted yet.")
+
+            st.button("Go to team")
             history = shared_draft.get("draft_history", [])
             current_pick_idx = len(history)
 
