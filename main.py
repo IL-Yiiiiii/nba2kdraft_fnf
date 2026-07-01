@@ -480,7 +480,7 @@ if not shared_draft["initialized"]:
     # Flip the master switch so the server remembers this data is ready
     shared_draft["initialized"] = True
 # --------------------------------------
-option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft", "Teams", "Trade Hub", "Results"])
+option = st.sidebar.selectbox("Menu", ["Home", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
 if st.sidebar.button("***:rainbow[Send snowflakes!]***"):
@@ -543,7 +543,7 @@ if option == "Home":
                 shared_draft["draft_mode"] = False
                 st.rerun()
         if shared_draft["draft_mode"]:
-            st.subheader("WEBSITE IS IN *DRAFT MODE* - Head to 'Headliner Players' to pick your 99 or 98")
+            st.subheader("WEBSITE IS IN *DRAFT MODE* - Head to the 'Draft Room'")
             st.subheader("Your pick position: ")
             st.button("Trade pick position")
             st.subheader("Current Round/Pick: ")
