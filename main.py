@@ -748,6 +748,7 @@ elif option == "Draft Room":
             # Show who has checked in
             picks_count = len(shared_draft['headliner_picks'])
             st.markdown(f"**Submissions received:** `{picks_count} / 7`")
+            st.write("DEBUG INFO:", username, "Picks:", picks_count)
 
             for user, pick in shared_draft["headliner_picks"].items():
                 # Admin sees what they picked, normal users just see that they submitted
