@@ -884,13 +884,9 @@ elif option == "Draft Room":
 
                 st.info(f"⚡ **ON THE CLOCK:** Round {curr_r}.{curr_p} — **{current_owner.capitalize()}**")
                 if username == current_owner:
-                    # If the person looking at the screen is the person who is up to pick...
-                    # Make a bold red box so they can't miss it
-                    st.error("🚨 IT IS YOUR TURN! Head to the search tabs to claim a player.")
-
                         # Trigger the pop-up notification
                     st.toast(f"You are on the clock for Round {curr_r}.{curr_p}!", icon="⏰")
-                    st.success("👉 It's your turn! Head to 'Search Players' to draft a player.")
+                    st.error("👉 IT IS YOUR TURN! Head to 'Search Players' to draft a player.")
             else:
                 st.balloons()
                 st.success("🎉 The draft is officially complete!")
