@@ -540,7 +540,7 @@ elif option == "Headliner Players":
     st.write("**Example:** Round 1: 1,2,3,4,5,6,7 | Round 2: 7,6,5,4,3,2,1")
     st.write("*> Picking a 99 will get you a pick in the range* **4-7**.")
     st.write("*> Picking a 98 will get you a pick in the range* **1-3**.")
-    st.write("*> **CONTEST SYSTEM:** If multiple people pick a player the person who gets the player is decided by random and the person (or people) who did not get the player has to pick from the remaining headliners.")
+    st.write("> **CONTEST SYSTEM:** If multiple people pick a player the person who gets the player is decided by random and the person (or people) who did not get the player has to pick from the remaining headliners.")
     st.write("Also: The efficiencies are more normal in the playoffs, for example, 3PT shooting % for mid shooters falls to mid 30 percentages")
     st.header("*:green[UNDRAFTED]*")
     display_t1()
