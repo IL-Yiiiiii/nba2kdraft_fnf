@@ -167,8 +167,6 @@ else:
         "draft_mode": False
     }
 
-st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
-
 def display_player(player):
     added_confirm = False
     added_already = False
@@ -643,7 +641,7 @@ if option == "Start":
                 st.write("Backup file deleted. Restarting app...")
                 st.rerun()
         if shared_draft["draft_mode"]:
-            st.subheader("Website is in *DRAFT MODE*, please head to 'Draft Hub'")
+            st.subheader("Website is in *DRAFT MODE*, please head to 'Draft Room'")
 
     elif auth_status is False:
         st.error("Username or password is incorrect")
@@ -786,6 +784,7 @@ elif option == "Compare Players":
 
 elif option == "Draft Room":
     st.title("*DRAFT ROOM*")
+    st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
 
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
