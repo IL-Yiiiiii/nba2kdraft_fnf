@@ -919,12 +919,17 @@ elif option == "Draft Room":
             st.button("Trade pick position")
 
             # Dynamic Team Overview
-            st.subheader("Your team: ")
-            user_roster = shared_draft["all_teams"].get(username, [])
-            if user_roster:
-                st.write(f"You currently have **{len(user_roster)}** player(s) drafted.")
+            st.subheader("*YOUR TEAM:*")
+
+            username = st.session_state.get("username", "Guest")
+            user_team = shared_draft["all_teams"].get(username, [])
+
+            if user_team:
+                st.write(f"Player Count: {len(user_team)}")
+                for i in range(len(user_team)):
+                    display_player(user_team[i])
             else:
-                st.write("No players drafted yet.")
+                st.write("You haven't drafted any players yet!")
 
             history = shared_draft.get("draft_history", [])
             current_pick_idx = len(history)
