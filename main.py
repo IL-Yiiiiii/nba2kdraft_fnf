@@ -919,7 +919,6 @@ elif option == "Draft Room":
             st.button("Trade pick position")
 
             # Dynamic Team Overview
-            st.divider()
             st.subheader("*YOUR TEAM:*")
 
             username = st.session_state.get("username", "Guest")
