@@ -925,7 +925,6 @@ elif option == "Draft Room":
             user_team = shared_draft["all_teams"].get(username, [])
 
             if user_team:
-                st.write(f"Player Count: {len(user_team)}")
                 for i in range(len(user_team)):
                     display_player(user_team[i])
             else:
