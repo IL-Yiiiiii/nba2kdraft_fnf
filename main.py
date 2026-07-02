@@ -544,7 +544,7 @@ if not shared_draft["initialized"]:
     # Flip the master switch so the server remembers this data is ready
     shared_draft["initialized"] = True
 # --------------------------------------
-option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"], key="menu_tracker")
+option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
 if shared_draft["draft_mode"]:
     username = st.session_state.get("username", "Guest")
 
@@ -926,9 +926,6 @@ elif option == "Draft Room":
             else:
                 st.write("No players drafted yet.")
 
-            if st.button("Go to 'Teams'"):
-                st.session_state.menu_tracker = "Teams"  # Changes the dropdown menu's value
-                st.rerun()  # Instantly reloads the page to show the Teams tab
             history = shared_draft.get("draft_history", [])
             current_pick_idx = len(history)
 
