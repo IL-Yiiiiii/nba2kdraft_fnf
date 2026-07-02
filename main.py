@@ -547,6 +547,19 @@ if not shared_draft["initialized"]:
 option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
 if shared_draft["draft_mode"]:
     username = st.session_state.get("username", "Guest")
+    # ==========================================
+    # ADAPTIVE REFRESH (Saves your screen from glowing)
+    # ==========================================
+    if option == "Draft Room":
+        # Hyper-fast updates while sitting in the active war room
+        st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
+    elif option in ["Search Players", "Compare Players"]:
+        # Much slower loop so you can read stats in peace without flickering,
+        # but still fast enough to catch a turn change notification within seconds.
+        st_autorefresh(interval=12000, limit=10000, key="scouting_counter")
+    else:
+        # Standard fallback for Guide, Teams, Results, etc.
+        st_autorefresh(interval=6000, limit=10000, key="global_counter")
 # ==========================================
 # GLOBAL ON-THE-CLOCK NOTIFICATION SYSTEM
 # ==========================================
@@ -784,7 +797,6 @@ elif option == "Compare Players":
 
 elif option == "Draft Room":
     st.title("*DRAFT ROOM*")
-    st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
 
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
