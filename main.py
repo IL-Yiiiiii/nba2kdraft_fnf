@@ -547,6 +547,19 @@ if not shared_draft["initialized"]:
 option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
 if shared_draft["draft_mode"]:
     username = st.session_state.get("username", "Guest")
+    
+# ==========================================
+# ADAPTIVE REFRESH (The 15-Second Slow-Sync)
+# ==========================================
+if option == "Draft Room":
+    # 3-second live updates for the active war room
+    st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
+elif option in ["Search Players", "Compare Players", "Headliner Players"]:
+    # 15-second slow updates so the screen doesn't constantly blink while scouting
+    st_autorefresh(interval=15000, limit=10000, key="scouting_counter")
+else:
+    # 10-second standard fallback for other pages
+    st_autorefresh(interval=10000, limit=10000, key="global_counter")
 
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
@@ -759,8 +772,6 @@ elif option == "Compare Players":
     st.dataframe(st.session_state.compare_df.T, width='stretch')
 
 elif option == "Draft Room":
-    # 1. Trigger the auto-refresh ONLY when looking at the Draft Room
-    st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
 
     st.title("*DRAFT ROOM*")
 
