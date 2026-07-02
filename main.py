@@ -547,16 +547,37 @@ if not shared_draft["initialized"]:
 option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
 if shared_draft["draft_mode"]:
     username = st.session_state.get("username", "Guest")
-    
+
+# ==========================================
+# GLOBAL ON-THE-CLOCK NOTIFICATION SYSTEM
+# ==========================================
+if shared_draft.get("draft_mode") and shared_draft.get("headliners_resolved"):
+    history = shared_draft.get("draft_history", [])
+    current_pick_idx = len(history)
+    total_teams = 7
+    total_rounds = 8
+
+    # Ensure the draft isn't over yet
+    if current_pick_idx < (total_teams * total_rounds):
+        curr_r = (current_pick_idx // total_teams) + 1
+        curr_p = (current_pick_idx % total_teams) + 1
+
+        # Calculate current owner using your snake draft math
+        if curr_r % 2 != 0:
+            current_owner = shared_draft["draft_order"][curr_p - 1]
+        else:
+            current_owner = shared_draft["draft_order"][total_teams - curr_p]
+
+        # If the viewer is the current owner, fire a toast!
+        if username == current_owner:
+            st.toast(f"🚨 YOU ARE ON THE CLOCK! (Round {curr_r}.{curr_p})", icon="⏰")
+
 # ==========================================
 # ADAPTIVE REFRESH (The 15-Second Slow-Sync)
 # ==========================================
 if option == "Draft Room":
     # 3-second live updates for the active war room
     st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
-elif option in ["Search Players", "Compare Players", "Headliner Players"]:
-    # 15-second slow updates so the screen doesn't constantly blink while scouting
-    st_autorefresh(interval=15000, limit=10000, key="scouting_counter")
 else:
     # 10-second standard fallback for other pages
     st_autorefresh(interval=10000, limit=10000, key="global_counter")
@@ -774,27 +795,6 @@ elif option == "Compare Players":
 elif option == "Draft Room":
 
     st.title("*DRAFT ROOM*")
-
-    # 2. RUN THE CLOCK CHECK ONLY INSIDE THIS ROOM
-    if shared_draft.get("draft_mode") and shared_draft.get("headliners_resolved"):
-        history = shared_draft.get("draft_history", [])
-        current_pick_idx = len(history)
-        total_teams = 7
-        total_rounds = 8
-
-        if current_pick_idx < (total_teams * total_rounds):
-            curr_r = (current_pick_idx // total_teams) + 1
-            curr_p = (current_pick_idx % total_teams) + 1
-
-            if curr_r % 2 != 0:
-                current_owner = shared_draft["draft_order"][curr_p - 1]
-            else:
-                current_owner = shared_draft["draft_order"][total_teams - curr_p]
-
-            # Fire the warning if the active viewer is the manager up to bat
-            username = st.session_state.get("username", "Guest")
-            if username == current_owner:
-                st.toast(f"🚨 YOU ARE ON THE CLOCK! (Round {curr_r}.{curr_p})", icon="⏰")
 
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
