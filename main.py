@@ -919,6 +919,7 @@ elif option == "Draft Room":
             st.button("Trade pick position")
 
             # Dynamic Team Overview
+            st.divider()
             st.subheader("*YOUR TEAM:*")
 
             username = st.session_state.get("username", "Guest")
@@ -930,6 +931,7 @@ elif option == "Draft Room":
                     display_player(user_team[i])
             else:
                 st.write("You haven't drafted any players yet!")
+            st.divider()
 
             history = shared_draft.get("draft_history", [])
             current_pick_idx = len(history)
