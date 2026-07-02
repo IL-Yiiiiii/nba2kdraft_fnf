@@ -580,7 +580,7 @@ if option == "Draft Room":
     st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
 else:
     # 10-second standard fallback for other pages
-    st_autorefresh(interval=10000, limit=10000, key="global_counter")
+    st_autorefresh(interval=15000, limit=10000, key="global_counter")
 
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
