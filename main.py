@@ -541,7 +541,6 @@ if not shared_draft["initialized"]:
     shared_draft["all_teams"] = {}
     shared_draft["picks_made"] = 0
     shared_draft["draft_mode"] = False
-    shared_draft.headliners_picked = False
     # Flip the master switch so the server remembers this data is ready
     shared_draft["initialized"] = True
 # --------------------------------------
@@ -796,7 +795,6 @@ elif option == "Compare Players":
 elif option == "Draft Room":
 
     st.title("*DRAFT ROOM*")
-    shared_draft.headliners_picked = False
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
 
@@ -890,13 +888,12 @@ elif option == "Draft Room":
                         random.shuffle(pool_other)
 
                         shared_draft["draft_order"] = pool_98 + pool_99 + pool_other
-
+                        shared_draft["headliners_resolved"] = True
                         save_draft_state(shared_draft)
-                    shared_draft.headliners_picked = True
                     st.rerun()
 
             # PHASE 1.5: The Draft Order Waiting Room
-            elif not shared_draft.get("order_locked", False) and shared_draft.headliners_picked:
+            elif not shared_draft.get("order_locked", False):
                 st.title("⚖️ DRAFT ORDER CONFIRMATION")
                 st.warning(
                     "⏳ **WAITING ROOM:** The Headliner draft is complete! Negotiate your draft slots now before we begin.")
