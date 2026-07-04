@@ -1070,21 +1070,25 @@ elif option == "Trade Hub":
             team_1 = st.selectbox("Select Player you want to give", shared_draft["all_teams"].get(username, []), key=f"your_player{players_traded}")
         with col2:
             team_2 = st.selectbox("Select Player you want to get", shared_draft["all_teams"].get(other_team, []), key=f"other_player{players_traded}")
-        if st.button("Add another player"):
-            players_traded += 1
-            with col1:
-                team_1 = st.selectbox("Select Player you want to give", shared_draft["all_teams"].get(username, []),
-                                      key=f"your_player{players_traded}")
-            with col2:
-                team_2 = st.selectbox("Select Player you want to get", shared_draft["all_teams"].get(other_team, []),
-                                      key=f"other_player{players_traded}")
-        elif st.button("Remove player"):
-            players_traded -= 1
-            #...
-
-        elif st.button("Propose trade"):
-            # ...
-            st.success(f"✅ The trade has been sent to {other_team}!")
+        col_add, col_remove, col_propose = st.columns(3)
+        with col_add:
+            if st.button("Add another player"):
+                players_traded += 1
+                with col1:
+                    team_1 = st.selectbox("Select Player you want to give", shared_draft["all_teams"].get(username, []),
+                                          key=f"your_player{players_traded}")
+                with col2:
+                    team_2 = st.selectbox("Select Player you want to get", shared_draft["all_teams"].get(other_team, []),
+                                          key=f"other_player{players_traded}")
+        with col_remove:
+            if st.button("Remove player"):
+                players_traded -= 1
+                #...
+        
+        with col_propose:
+            if st.button("Propose trade"):
+                # ...
+                st.success(f"✅ The trade has been sent to {other_team}!")
 
 elif option == "Results":
     st.title("*RESULTS*")
