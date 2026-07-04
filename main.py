@@ -541,7 +541,7 @@ if not shared_draft["initialized"]:
     shared_draft["all_teams"] = {}
     shared_draft["picks_made"] = 0
     shared_draft["draft_mode"] = False
-    shared_draft["headliners_picked"] = False
+    shared_draft.headliners_picked = False
     # Flip the master switch so the server remembers this data is ready
     shared_draft["initialized"] = True
 # --------------------------------------
