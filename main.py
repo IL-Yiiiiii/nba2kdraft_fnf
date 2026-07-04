@@ -69,7 +69,7 @@ class Player:
         self.compare = False
 
     def __str__(self):
-        return self.name
+        return self.name.capitalize()
 
     def clone(self):
             return copy.deepcopy(self)
