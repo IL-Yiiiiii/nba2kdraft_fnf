@@ -67,7 +67,7 @@ class Player:
         self.three_p = three_p
         self.ftp = ftp
         self.compare = False
-        
+
     def __str__(self):
         return self.name
 
@@ -895,9 +895,9 @@ elif option == "Draft Room":
             if username.capitalize() == "Isaac":
                 col1, col2 = st.columns(2)
                 with col1:
-                    team_1 = st.selectbox("Select Team 1", shared_draft["draft_order"], key="swap_1")
+                    team_1 = st.selectbox("Select Team 1", shared_draft["draft_order"], format_func=lambda name: name.capitalize(), key="swap_1")
                 with col2:
-                    team_2 = st.selectbox("Select Team 2", shared_draft["draft_order"], key="swap_2")
+                    team_2 = st.selectbox("Select Team 2", shared_draft["draft_order"], format_func=lambda name: name.capitalize(), key="swap_2")
 
                 if st.button("Confirm Position Swap"):
                     if team_1 == team_2:
@@ -1063,7 +1063,7 @@ elif option == "Trade Hub":
     if not shared_draft["draft_mode"]:
         st.subheader("**Will open in draft mode!**")
     else:
-        other_team = st.selectbox("Select other team", shared_draft["draft_order"], key="other_team")
+        other_team = st.selectbox("Select other team", shared_draft["draft_order"], format_func=lambda name: name.capitalize(), key="other_team")
         col1, col2 = st.columns(2)
         with col1:
             team_1 = st.selectbox("Select Player you want to give", shared_draft["all_teams"].get(username, []), key="your_player")
