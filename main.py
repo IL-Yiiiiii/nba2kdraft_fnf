@@ -633,13 +633,13 @@ if option == "Start":
             st.subheader("**Website currently in pre-draft mode**")
             st.write("You can look at players and build teams")
         if name == "Isaac":
-            if st.button("START DRAFT"):
+            if st.button("DRAFT MODE"):
                 shared_draft["draft_mode"] = True
-                save_draft_state(shared_draft)  # 💾 SAVE THE SWITCH TO THE FILE!
+                save_draft_state(shared_draft) 
                 st.rerun()
-            if st.button("REVERT TO PRE-DRAFT MODE"):
+            if st.button("PRE-DRAFT MODE"):
                 shared_draft["draft_mode"] = False
-                save_draft_state(shared_draft)  # 💾 SAVE THE SWITCH TO THE FILE!
+                save_draft_state(shared_draft)
                 st.rerun()
             if st.button("⚠️ EMERGENCY RESET ENTIRE DRAFT"):
                 if os.path.exists(DB_FILE):
