@@ -892,52 +892,51 @@ elif option == "Draft Room":
                         save_draft_state(shared_draft)
                     st.rerun()
 
-            # PHASE 1.5: The Draft Order Waiting Room
-            elif not shared_draft.get("order_locked", False):
-                st.title("⚖️ DRAFT ORDER CONFIRMATION")
-                st.warning(
-                    "⏳ **WAITING ROOM:** The Headliner draft is complete! Negotiate your draft slots now before we begin.")
+        # PHASE 1.5: The Draft Order Waiting Room
+        elif not shared_draft.get("order_locked", False):
+            st.title("⚖️ DRAFT ORDER CONFIRMATION")
+            st.warning(
+                "⏳ **WAITING ROOM:** The Headliner draft is complete! Negotiate your draft slots now before we begin.")
 
-                st.markdown("### 🔄 Swap Draft Positions")
-                col1, col2 = st.columns(2)
-                with col1:
-                    team_1 = st.selectbox("Select Team 1", shared_draft["draft_order"], key="swap_1")
-                with col2:
-                    team_2 = st.selectbox("Select Team 2", shared_draft["draft_order"], key="swap_2")
+            st.markdown("### 🔄 Swap Draft Positions")
+            col1, col2 = st.columns(2)
+            with col1:
+                team_1 = st.selectbox("Select Team 1", shared_draft["draft_order"], key="swap_1")
+            with col2:
+                team_2 = st.selectbox("Select Team 2", shared_draft["draft_order"], key="swap_2")
 
-                if st.button("Confirm Position Swap"):
-                    if team_1 == team_2:
-                        st.error("🟥 You can't swap a team with themselves!")
-                    else:
-                        idx_1 = shared_draft["draft_order"].index(team_1)
-                        idx_2 = shared_draft["draft_order"].index(team_2)
-
-                        shared_draft["draft_order"][idx_1], shared_draft["draft_order"][idx_2] = \
-                            shared_draft["draft_order"][idx_2], shared_draft["draft_order"][idx_1]
-
-                        if save_draft_state(shared_draft):
-                            st.success(f"🟩 {team_1} and {team_2} swapped spots!")
-                            st.rerun()
-
-                st.markdown("---")
-                st.markdown("### Current Draft Order")
-                for i, team in enumerate(shared_draft["draft_order"]):
-                    st.write(f"**Pick {i + 1}:** {team}")
-
-                st.markdown("---")
-                if username == "Isaac":
-                    # You see the big shiny button
-                    if st.button("🔒 LOCK DRAFT ORDER & START MAIN DRAFT", type="primary"):
-                        shared_draft["order_locked"] = True
-                        if save_draft_state(shared_draft):
-                            st.rerun()
+            if st.button("Confirm Position Swap"):
+                if team_1 == team_2:
+                    st.error("🟥 You can't swap a team with themselves!")
                 else:
-                    # Everyone else sees a status message
-                    st.info("⏳ Waiting for the draft order to be confirmed...")
+                    idx_1 = shared_draft["draft_order"].index(team_1)
+                    idx_2 = shared_draft["draft_order"].index(team_2)
+
+                    shared_draft["draft_order"][idx_1], shared_draft["draft_order"][idx_2] = \
+                        shared_draft["draft_order"][idx_2], shared_draft["draft_order"][idx_1]
+
+                    if save_draft_state(shared_draft):
+                        st.success(f"🟩 {team_1} and {team_2} swapped spots!")
+                        st.rerun()
+
+            st.markdown("---")
+            st.markdown("### Current Draft Order")
+            for i, team in enumerate(shared_draft["draft_order"]):
+                st.write(f"**Pick {i + 1}:** {team}")
+
+            st.markdown("---")
+            if username == "Isaac":
+                # You see the big shiny button
+                if st.button("🔒 LOCK DRAFT ORDER & START MAIN DRAFT", type="primary"):
+                    shared_draft["order_locked"] = True
+                    if save_draft_state(shared_draft):
+                        st.rerun()
+            else:
+                # Everyone else sees a status message
+                st.info("⏳ Waiting for the draft order to be confirmed...")
 
         # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
-        # MOVED: Properly aligned with Phase 1 out of the loop
-        elif shared_draft["headliners_resolved"]:
+        else:
             # Dynamic Pick Position and Current Pick
             if shared_draft["headliners_resolved"]:
                 # 1. Find their pick position
