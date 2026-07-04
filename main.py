@@ -69,7 +69,7 @@ class Player:
         self.compare = False
 
     def __str__(self):
-        return self.name.capitalize()
+        return self.name
 
     def clone(self):
             return copy.deepcopy(self)
@@ -1092,7 +1092,7 @@ elif option == "Trade Hub":
                 trade_sent = True
 
         if trade_sent:
-            st.success(f"✅ The trade has been sent to {other_team}!")
+            st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
 
 elif option == "Results":
     st.title("*RESULTS*")
