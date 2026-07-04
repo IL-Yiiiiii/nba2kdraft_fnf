@@ -656,7 +656,7 @@ if option == "Start":
     elif auth_status is False:
         st.error("Username or password is incorrect")
     elif auth_status is None:
-        st.warning("Please enter your username and password")
+        st.warning("Please enter your username and password (only needed when draft starts)")
     # Login ends here
 
 elif option == "Guide":
@@ -795,7 +795,7 @@ elif option == "Compare Players":
 elif option == "Draft Room":
 
     st.title("*DRAFT ROOM*")
-
+    headliners_picked = False
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
 
@@ -891,11 +891,11 @@ elif option == "Draft Room":
                         shared_draft["draft_order"] = pool_98 + pool_99 + pool_other
 
                         save_draft_state(shared_draft)
-
+                    headliners_picked = True
                     st.rerun()
 
             # PHASE 1.5: The Draft Order Waiting Room
-            elif not shared_draft.get("order_locked", False):
+            elif not shared_draft.get("order_locked", False) and headliners_picked:
                 st.title("⚖️ DRAFT ORDER CONFIRMATION")
                 st.warning(
                     "⏳ **WAITING ROOM:** The Headliner draft is complete! Negotiate your draft slots now before we begin.")
@@ -927,11 +927,15 @@ elif option == "Draft Room":
                     st.write(f"**Pick {i + 1}:** {team}")
 
                 st.markdown("---")
-                # THE LOCK BUTTON: Only the commissioner (or anyone, if you prefer) clicks this to start the draft
-                if st.button("🔒 LOCK DRAFT ORDER & START MAIN DRAFT", type="primary"):
-                    shared_draft["order_locked"] = True
-                    if save_draft_state(shared_draft):
-                        st.rerun()
+                if username == "Isaac":
+                    # You see the big shiny button
+                    if st.button("🔒 LOCK DRAFT ORDER & START MAIN DRAFT", type="primary"):
+                        shared_draft["order_locked"] = True
+                        if save_draft_state(shared_draft):
+                            st.rerun()
+                else:
+                    # Everyone else sees a status message
+                    st.info("⏳ Waiting for the draft order to be confirmed...")
 
         # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
         # MOVED: Properly aligned with Phase 1 out of the loop
