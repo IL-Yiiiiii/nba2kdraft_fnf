@@ -1078,6 +1078,13 @@ elif option == "Trade Hub":
             with col2:
                 team_2 = st.selectbox("Select Player you want to get", shared_draft["all_teams"].get(other_team, []),
                                       key=f"other_player{players_traded}")
+        elif st.button("Remove player"):
+            players_traded -= 1
+            #...
+
+        elif st.button("Propose trade"):
+            # ...
+            st.success(f"✅ The trade has been sent to {other_team}!")
 
 elif option == "Results":
     st.title("*RESULTS*")
