@@ -1066,6 +1066,7 @@ elif option == "Trade Hub":
         other_team = st.selectbox("Select other team", shared_draft["draft_order"], format_func=lambda name: name.capitalize(), key="other_team")
         col1, col2 = st.columns(2)
         players_traded = 1
+        trade_sent = False
         with col1:
             team_1 = st.selectbox("Select Player you want to give", shared_draft["all_teams"].get(username, []), key=f"your_player{players_traded}")
         with col2:
@@ -1084,11 +1085,14 @@ elif option == "Trade Hub":
             if st.button("Remove player"):
                 players_traded -= 1
                 #...
-        
+
         with col_propose:
             if st.button("Propose trade"):
                 # ...
-                st.success(f"✅ The trade has been sent to {other_team}!")
+                trade_sent = True
+
+        if trade_sent:
+            st.success(f"✅ The trade has been sent to {other_team}!")
 
 elif option == "Results":
     st.title("*RESULTS*")
