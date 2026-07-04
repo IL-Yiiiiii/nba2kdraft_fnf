@@ -635,7 +635,7 @@ if option == "Start":
         if name == "Isaac":
             if st.button("DRAFT MODE"):
                 shared_draft["draft_mode"] = True
-                save_draft_state(shared_draft) 
+                save_draft_state(shared_draft)
                 st.rerun()
             if st.button("PRE-DRAFT MODE"):
                 shared_draft["draft_mode"] = False
@@ -772,7 +772,6 @@ elif option == "Compare Players":
 
         n = len(st.session_state.compare_array)
 
-        # Match the ratio to your df's row-label vs data columns
         col_widths = [1.5] + [1] * n
         cols = st.columns(col_widths)
 
@@ -812,19 +811,15 @@ elif option == "Draft Room":
 
             st.divider()
 
-            # Show who has checked in
             picks_count = len(shared_draft.get('headliner_picks', {}))
             st.markdown(f"**Submissions received:** `{picks_count} / 7`")
 
             for user, pick in shared_draft.get("headliner_picks", {}).items():
-                # Admin sees what they picked, normal users just see that they submitted
                 if st.session_state.get("name") == "Isaac":
                     st.write(f"- **{user.capitalize()}** selected *{pick}*")
                 else:
                     st.write(f"- **{user.capitalize()}** has locked in a choice.")
 
-            # Admin Button to run coin flips and sort 98/99s
-            # MOVED: Placed cleanly outside the 'for' loop so it can render for Isaac
             if username.lower() == "isaac" and picks_count == 7:
                 st.write("")
                 if st.button("Resolve Contests & Generate Draft Order", type="primary"):
@@ -857,7 +852,6 @@ elif option == "Draft Room":
                         shared_draft["coin_flip_losers"] = losers_this_round
                         save_draft_state(shared_draft)
                     else:
-                        # Clean finish! Separate and shuffle 98s vs 99s
                         shared_draft["headliners_resolved"] = True
                         pool_98 = []
                         pool_99 = []
@@ -923,13 +917,11 @@ elif option == "Draft Room":
 
             st.markdown("---")
             if username.capitalize() == "Isaac":
-                # You see the big shiny button
                 if st.button("🔒 LOCK DRAFT ORDER & START MAIN DRAFT", type="primary"):
                     shared_draft["order_locked"] = True
                     if save_draft_state(shared_draft):
                         st.rerun()
             else:
-                # Everyone else sees a status message
                 st.info("⏳ Waiting for the draft order to be confirmed...")
 
         # --- PHASE 2 DISPLAY: THE LIVE PROGRESS TIMELINE ---
@@ -1067,6 +1059,13 @@ elif option == "Trade Hub":
     st.title("*TRADE HUB*")
     if not shared_draft["draft_mode"]:
         st.subheader("**Will open in draft mode!**")
+    else:
+        other_team = st.selectbox("Select other team", shared_draft["draft_order"], key="other_team")
+        col1, col2 = st.columns(2)
+        with col1:
+            team_1 = st.selectbox("Select Player you want to give", shared_draft["all_teams"].get(username, []), key="your_player")
+        with col2:
+            team_2 = st.selectbox("Select Player you want to get", shared_draft["all_teams"].get(other_team, []), key="other_player")
 
 elif option == "Results":
     st.title("*RESULTS*")
