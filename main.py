@@ -901,9 +901,9 @@ elif option == "Draft Room":
             st.markdown("### 🔄 Swap Draft Positions")
             col1, col2 = st.columns(2)
             with col1:
-                team_1 = st.selectbox("Select Team 1", shared_draft["draft_order"].capitalize(), key="swap_1")
+                team_1 = st.selectbox("Select Team 1", shared_draft["draft_order"], key="swap_1")
             with col2:
-                team_2 = st.selectbox("Select Team 2", shared_draft["draft_order"].capitalize(), key="swap_2")
+                team_2 = st.selectbox("Select Team 2", shared_draft["draft_order"], key="swap_2")
 
             if st.button("Confirm Position Swap"):
                 if team_1 == team_2:
