@@ -1000,8 +1000,7 @@ elif option == "Draft Room":
                         # Trigger the pop-up notification
                     st.success("👉 IT IS YOUR TURN! Head to 'Search Players' to draft a player.")
             else:
-                st.balloons()
-                st.success("🎉 The draft is officially complete!")
+                st.success("🎉 The draft is officially finished!")
 
             st.write("")
             with st.expander("👑 View Phase 1: Headliner Selections", expanded=False):
