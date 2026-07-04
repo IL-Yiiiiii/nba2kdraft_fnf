@@ -896,9 +896,9 @@ elif option == "Draft Room":
         elif not shared_draft.get("order_locked", False):
             st.title("⚖️ DRAFT ORDER CONFIRMATION")
             st.warning(
-                "⏳ **WAITING ROOM:** The Headliner draft is complete! Negotiate your draft slots now before we begin.")
+                "⏳ **WAITING ROOM:** The Headliner draft is complete! Does anyone want to swap positions in the draft order?")
 
-            st.markdown("### 🔄 Swap Draft Positions")
+            st.markdown("### 🔄 Swap Draft Positions?")
             if username.capitalize() == "Isaac":
                 col1, col2 = st.columns(2)
                 with col1:
