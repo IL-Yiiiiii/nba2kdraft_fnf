@@ -67,6 +67,9 @@ class Player:
         self.three_p = three_p
         self.ftp = ftp
         self.compare = False
+        
+    def __str__(self):
+        return self.name
 
     def clone(self):
             return copy.deepcopy(self)
