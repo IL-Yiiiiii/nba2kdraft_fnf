@@ -922,10 +922,10 @@ elif option == "Draft Room":
             st.markdown("---")
             st.markdown("### Current Draft Order")
             for i, team in enumerate(shared_draft["draft_order"]):
-                st.write(f"**Pick {i + 1}:** {team}")
+                st.write(f"**Pick {i + 1}:** {team.capitalize()}")
 
             st.markdown("---")
-            if username == "Isaac":
+            if username.capitalize() == "Isaac":
                 # You see the big shiny button
                 if st.button("🔒 LOCK DRAFT ORDER & START MAIN DRAFT", type="primary"):
                     shared_draft["order_locked"] = True
