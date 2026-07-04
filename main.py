@@ -1060,6 +1060,7 @@ elif option == "Teams":
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
+    st.subheader("PROPOSE TRADE:")
     if not shared_draft["draft_mode"]:
         st.subheader("**Will open in draft mode!**")
     else:
@@ -1093,6 +1094,8 @@ elif option == "Trade Hub":
 
         if trade_sent:
             st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
+
+        st.subheader("TRADES RECEIVED:")
 
 elif option == "Results":
     st.title("*RESULTS*")
