@@ -3,7 +3,7 @@ import streamlit_authenticator as stauth
 from streamlit_autorefresh import st_autorefresh
 import os
 import pickle
-import sys  # 👈 1. ADD THIS IMPORT
+import sys  
 
 DB_FILE = "draft_backup.pkl"
 
@@ -795,7 +795,6 @@ elif option == "Compare Players":
 elif option == "Draft Room":
 
     st.title("*DRAFT ROOM*")
-    headliners_picked = False
     if not shared_draft["draft_mode"]:
         st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
 
@@ -891,11 +890,10 @@ elif option == "Draft Room":
                         shared_draft["draft_order"] = pool_98 + pool_99 + pool_other
 
                         save_draft_state(shared_draft)
-                    headliners_picked = True
                     st.rerun()
 
             # PHASE 1.5: The Draft Order Waiting Room
-            elif not shared_draft.get("order_locked", False) and headliners_picked:
+            elif not shared_draft.get("order_locked", False) and shared_draft["headliners_resolved"]:
                 st.title("⚖️ DRAFT ORDER CONFIRMATION")
                 st.warning(
                     "⏳ **WAITING ROOM:** The Headliner draft is complete! Negotiate your draft slots now before we begin.")
@@ -958,8 +956,6 @@ elif option == "Draft Room":
                 # Fallback text while Headliners are still being picked
                 st.subheader("Your pick position: **TBD (Pending Headliners)**")
                 st.subheader("Current Round/Pick: **Phase 1**")
-
-            st.button("Trade pick position")
 
             # Dynamic Team Overview
             st.subheader("*YOUR TEAM:*")
