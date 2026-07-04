@@ -573,13 +573,9 @@ if shared_draft.get("draft_mode") and shared_draft.get("headliners_resolved"):
             st.toast(f"🚨 YOU ARE ON THE CLOCK! (Round {curr_r}.{curr_p})", icon="⏰")
 
 # ==========================================
-# ADAPTIVE REFRESH (The 15-Second Slow-Sync)
-# ==========================================
 if option == "Draft Room":
-    # 3-second live updates for the active war room
-    st_autorefresh(interval=3000, limit=10000, key="draft_room_counter")
+    st_autorefresh(interval=5000, limit=10000, key="draft_room_counter")
 else:
-    # 10-second standard fallback for other pages
     st_autorefresh(interval=15000, limit=10000, key="global_counter")
 
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
