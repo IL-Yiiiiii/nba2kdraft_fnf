@@ -6,6 +6,7 @@ import pickle
 import sys 
 import base64
 import requests
+st.write("🕵️‍♂️ Secrets found by app:", list(st.secrets.keys()))
 
 # --- CLOUD DATABASE SETUP ---
 BIN_ID = st.secrets["BIN_ID"]
