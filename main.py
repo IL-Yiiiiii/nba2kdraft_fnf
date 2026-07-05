@@ -4,7 +4,7 @@ from streamlit_autorefresh import st_autorefresh
 import pickle
 import base64
 import requests
-from player.py import Player
+from player import Player
 
 # --- CLOUD DATABASE SETUP ---
 BIN_ID = st.secrets["database"]["BIN_ID"]
