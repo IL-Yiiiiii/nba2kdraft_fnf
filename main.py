@@ -1,11 +1,10 @@
-import copy, streamlit as st, pandas as pd, random
+import streamlit as st, pandas as pd, random
 import streamlit_authenticator as stauth
 from streamlit_autorefresh import st_autorefresh
-import os
 import pickle
-import sys
 import base64
 import requests
+from player import Player
 
 # --- CLOUD DATABASE SETUP ---
 BIN_ID = st.secrets["database"]["BIN_ID"]
@@ -47,74 +46,6 @@ def save_draft_state(draft_dict):
         st.error(f"Failed to save to cloud: {e}")
         return False
 
-class Player:
-    def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
-        self.name = name
-        self.rating = rating
-        self.primary_pos = primary_pos
-        self.secondary_pos = secondary_pos
-        self.set = set
-        self.desc = ""
-        self.pic = ""
-        self.ht = ht
-        self.wt = str(wt) + "lbs"
-        self.ins = ins
-        self.mid = mid
-        self.three = three
-        self.plk = plk
-        self.itd = itd
-        self.prd = prd
-        self.reb = reb
-        self.ath = ath
-        self.ppg = ppg
-        self.rpg = rpg
-        self.apg = apg
-        self.mpg = mpg
-        self.spg = spg
-        self.bpg = bpg
-        self.fgp = fgp
-        self.three_p = three_p
-        self.ftp = ftp
-        self.compare = False
-
-    def __str__(self):
-        return self.name
-
-    def clone(self):
-            return copy.deepcopy(self)
-
-    def convert_positions(self):
-        if self.secondary_pos == "":
-            positions = self.primary_pos
-        else:
-            positions = self.primary_pos+"/"+self.secondary_pos
-        return positions
-
-    def to_dict(self):
-        return {"Name": self.name,
-        "Rating": self.rating,
-        "Positions": self.convert_positions(),
-        "Height":      self.ht,
-        "Weight":      self.wt,
-        "Inside Scoring":     self.ins,
-        "Mid Range Shooting":     self.mid,
-        "3PT Shooting":    self.three,
-        "Playmaking":     self.plk,
-        "Interior Defense":     self.itd,
-        "Perimeter Defense":     self.prd,
-        "Rebounding":     self.reb,
-        "Athleticism":     self.ath,
-        "PPG":     self.ppg,
-        "RPG":     self.rpg,
-        "APG":     self.apg,
-        "MPG":     self.mpg,
-        "SPG":     self.spg,
-        "BPG":     self.bpg,
-        "FG%":     self.fgp,
-        "3P%": self.three_p,
-        "FT%":     self.ftp,
-    }
-
 def load(file, array):
     try:
         with open(file) as f:
@@ -153,12 +84,6 @@ def load(file, array):
     except FileNotFoundError:
         print("File not found")
 
-# 🚀 2. FORCE-BIND CLASS TO MAIN SPACE (Fixes dynamic Streamlit module pickling errors)
-sys.modules['__main__'].Player = Player
-
-# ==========================================
-# 3. LOAD THE STABLE BACKUP
-# ==========================================
 saved_state = load_draft_state()
 
 if saved_state is not None:
@@ -188,7 +113,6 @@ def display_player(player):
     if player.secondary_pos != "":
         secondary = "/" + player.secondary_pos
 
-    # Grab the logged-in username for roster mapping
     username = st.session_state.get("username", "Guest")
 
     with st.expander(f"***{player.name}*** [{player.rating} - {player.primary_pos}{secondary}]"):
@@ -196,7 +120,6 @@ def display_player(player):
         with col_left:
             if player.pic != "":
                 st.image(player.pic)
-            # Global check for draft mode
             if not shared_draft["draft_mode"]:
                 if st.button("Undo draft player", key=f"undo_button_{player.name}"):
                     was_in_regular = any(p.name == player.name for p in shared_draft["drafted_player_array"])
@@ -209,7 +132,6 @@ def display_player(player):
                         shared_draft["t1_array"].append(player.clone())
                         shared_draft["t1_array"].sort(key=lambda x: int(x.rating), reverse=True)
 
-                    # Remove from whichever team owned them globally
                     for team_owner in shared_draft["all_teams"]:
                         shared_draft["all_teams"][team_owner] = [p for p in shared_draft["all_teams"][team_owner] if
                                                                  p.name != player.name]
@@ -240,7 +162,6 @@ def display_player(player):
                         added_already = True
             with col_draft:
                 if st.button("Draft Player", key=f"draft_button_{player.name}"):
-                    # Check if already drafted globally by anyone
                     already_drafted = (any(p.name == player.name for p in shared_draft["drafted_player_array"]) or
                                        any(p.name == player.name for p in shared_draft["drafted_t1_array"]))
 
