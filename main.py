@@ -1121,7 +1121,7 @@ elif option == "Trade Hub":
                     with col_accept:
                         # Using trade.get("id") as the ultimate key
                         unique_key = trade.get("id", f"backup_{idx}")
-                        if st.button("🤝 Accept Trade", key=f"accept_{unique_key}", use_container_width=True)
+                        if st.button("🤝 Accept Trade", key=f"accept_{unique_key}", use_container_width=True):
                             # Fetch current rosters
                             my_roster = shared_draft["all_teams"].get(username, [])
                             their_roster = shared_draft["all_teams"].get(from_team, [])
@@ -1152,7 +1152,6 @@ elif option == "Trade Hub":
                     with col_decline:
                         unique_key = trade.get("id", f"backup_{idx}")
                         if st.button("❌ Decline", key=f"decline_{unique_key}", use_container_width=True):
-                        if st.button("❌ Decline", key=f"decline_{idx}_{from_team}", use_container_width=True):
                             trade["status"] = "declined"
                             if save_draft_state(shared_draft):
                                 st.toast(f"Declined offer from {from_team.capitalize()}.")
