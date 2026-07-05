@@ -1060,42 +1060,64 @@ elif option == "Teams":
 
 elif option == "Trade Hub":
     st.title("*TRADE HUB*")
-    st.subheader("PROPOSE TRADE:")
+
     if not shared_draft["draft_mode"]:
         st.subheader("**Will open in draft mode!**")
     else:
-        other_team = st.selectbox("Select other team", shared_draft["draft_order"], format_func=lambda name: name.capitalize(), key="other_team")
-        col1, col2 = st.columns(2)
-        players_traded = 1
-        trade_sent = False
-        with col1:
-            team_1 = st.selectbox("Select Player you want to give", shared_draft["all_teams"].get(username, []), key=f"your_player{players_traded}")
-        with col2:
-            team_2 = st.selectbox("Select Player you want to get", shared_draft["all_teams"].get(other_team, []), key=f"other_player{players_traded}")
+        st.subheader("PROPOSE TRADE:")
+        other_team = st.selectbox(
+            "Select other team",
+            shared_draft["draft_order"],
+            format_func=lambda name: name.capitalize(),
+            key="other_team"
+        )
+        if "trade_count" not in st.session_state:
+            st.session_state.trade_count = 1
+        players_to_give = []
+        players_to_get = []
+        for i in range(st.session_state.trade_count):
+            st.write(f"**Player {i + 1}**")
+            col1, col2 = st.columns(2)
+            with col1:
+                give_player = st.selectbox(
+                    "Select Player you want to give",
+                    shared_draft["all_teams"].get(username, []),
+                    key=f"give_player_{i}"
+                )
+                players_to_give.append(give_player)
+            with col2:
+                get_player = st.selectbox(
+                    "Select Player you want to get",
+                    shared_draft["all_teams"].get(other_team, []),
+                    key=f"get_player_{i}"
+                )
+                players_to_get.append(get_player)
+        st.markdown("---")
         col_add, col_remove, col_propose = st.columns(3)
         with col_add:
             if st.button("Add another player"):
-                players_traded += 1
-                with col1:
-                    team_1 = st.selectbox("Select Player you want to give", shared_draft["all_teams"].get(username, []),
-                                          key=f"your_player{players_traded}")
-                with col2:
-                    team_2 = st.selectbox("Select Player you want to get", shared_draft["all_teams"].get(other_team, []),
-                                          key=f"other_player{players_traded}")
+                st.session_state.trade_count += 1
+                st.rerun() 
         with col_remove:
-            if st.button("Remove player"):
-                players_traded -= 1
-                #...
-
+            if st.button("Remove player") and st.session_state.trade_count > 1:
+                st.session_state.trade_count -= 1
+                st.rerun()
         with col_propose:
             if st.button("Propose trade"):
-                # ...
-                trade_sent = True
+                trade_proposal = {
+                    "from_team": username,
+                    "to_team": other_team,
+                    "giving": players_to_give,
+                    "getting": players_to_get,
+                    "status": "pending"
+                }
+                if "pending_trades" not in shared_draft:
+                    shared_draft["pending_trades"] = []
 
-        if trade_sent:
-            st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
+                shared_draft["pending_trades"].append(trade_proposal)
 
-        st.subheader("TRADES RECEIVED:")
+                st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
+                st.session_state.trade_count = 1
 
 elif option == "Results":
     st.title("*RESULTS*")
