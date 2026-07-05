@@ -1098,11 +1098,29 @@ elif option == "Trade Hub":
                             if p:
                                 display_player(p)
 
+                    # 🎨 Injecting the custom green styling block right before the buttons
+                    st.markdown("""
+                                <style>
+                                    div.green-btn div[data-testid="stButton"] button {
+                                        background-color: #2ea44f !important;
+                                        color: white !important;
+                                        border: 1px solid #2ea44f !important;
+                                    }
+                                    div.green-btn div[data-testid="stButton"] button:hover {
+                                        background-color: #227d3b !important;
+                                        border-color: #227d3b !important;
+                                        color: white !important;
+                                    }
+                                </style>
+                            """, unsafe_allow_html=True)
+
                     st.write("")
                     col_accept, col_decline = st.columns(2)
 
                     with col_accept:
-                        if st.button("🤝 Accept Trade", key=f"accept_{idx}_{from_team}", type="primary",
+                        # 🟢 Wrap the Accept button in our custom "green-btn" class
+                        st.markdown('<div class="green-btn">', unsafe_allow_html=True)
+                        if st.button("🤝 Accept Trade", key=f"accept_{idx}_{from_team}",
                                      use_container_width=True):
                             # Fetch current rosters
                             my_roster = shared_draft["all_teams"].get(username, [])
@@ -1113,11 +1131,17 @@ elif option == "Trade Hub":
                             items_i_gain = [p.name for p in trade.get("giving", []) if p]
 
                             # Execute the multi-player roster swap
-                            new_my_roster = [p for p in my_roster if p.name not in items_i_lose] + [p for p in
-                                                                                                    their_roster if
+                            new_my_roster = [p for p in my_roster if p.name not in items_i_lose] + [p for p
+                                                                                                    in
+                                                                                                    their_roster
+                                                                                                    if
                                                                                                     p.name in items_i_gain]
-                            new_their_roster = [p for p in their_roster if p.name not in items_i_gain] + [p for p in
-                                                                                                          my_roster if
+                            new_their_roster = [p for p in their_roster if p.name not in items_i_gain] + [p
+                                                                                                          for
+                                                                                                          p
+                                                                                                          in
+                                                                                                          my_roster
+                                                                                                          if
                                                                                                           p.name in items_i_lose]
 
                             # Save back to database
@@ -1130,13 +1154,16 @@ elif option == "Trade Hub":
                             if save_draft_state(shared_draft):
                                 st.success("🎉 Trade successful! Your rosters have been updated.")
                                 st.rerun()
+                        st.markdown('</div>', unsafe_allow_html=True)  # Close the green wrapper
 
-                    with col_decline:
-                        if st.button("❌ Decline", key=f"decline_{idx}_{from_team}", use_container_width=True):
-                            trade["status"] = "declined"
-                            if save_draft_state(shared_draft):
-                                st.toast(f"Declined offer from {from_team.capitalize()}.")
-                                st.rerun()
+                                with col_decline:
+                                    # 🔴 Keep type="primary" so Streamlit makes this one your theme's red
+                                    if st.button("❌ Decline", key=f"decline_{idx}_{from_team}", type="primary",
+                                                 use_container_width=True):
+                                        trade["status"] = "declined"
+                                        if save_draft_state(shared_draft):
+                                            st.toast(f"Declined offer from {from_team.capitalize()}.")
+                                            st.rerun()
 
         st.divider()
         st.subheader("📜 TRADE HISTORY")
