@@ -507,10 +507,11 @@ if shared_draft.get("draft_mode") and shared_draft.get("headliners_resolved"):
             st.toast(f"🚨 YOU ARE ON THE CLOCK! (Round {curr_r}.{curr_p})", icon="⏰")
 
 # ==========================================
-if option == "Draft Room":
-    st_autorefresh(interval=5000, limit=10000, key="draft_room_counter")
-else:
-    st_autorefresh(interval=15000, limit=10000, key="global_counter")
+if shared_draft.get("draft_mode"):
+    if option == "Draft Room":
+        st_autorefresh(interval=5000, limit=10000, key="draft_room_counter")
+    else:
+        st_autorefresh(interval=15000, limit=10000, key="global_counter")
 
 if st.sidebar.button("***:rainbow[Send balloons!]***"):
     st.balloons()
