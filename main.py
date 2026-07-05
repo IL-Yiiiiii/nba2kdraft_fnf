@@ -534,7 +534,7 @@ if "pending_toast" in st.session_state:
 
 # --- GLOBAL STORAGE (Shared Across All Devices) ---
 # This block runs EXACTLY ONCE when the first person boots up the website
-if not shared_draft.get("initialized", False):    
+if not shared_draft.get("initialized", False):
     # 1. Load available player pools from text files
     temp_players = []
     load("txt/players.txt", temp_players)
@@ -654,9 +654,24 @@ if option == "Start":
                 save_draft_state(shared_draft)
                 st.rerun()
             if st.button("⚠️ EMERGENCY RESET ENTIRE DRAFT"):
-                if os.path.exists(DB_FILE):
-                    os.remove(DB_FILE)
-                st.write("Backup file deleted. Restarting app...")
+                # Re-initializes a fresh, clean slate dictionary
+                empty_draft = {
+                    "initialized": False,
+                    "player_array": [],
+                    "t1_array": [],
+                    "drafted_player_array": [],
+                    "drafted_t1_array": [],
+                    "all_teams": {},
+                    "headliner_picks": {},
+                    "draft_order": [],
+                    "headliners_resolved": False,
+                    "coin_flip_losers": [],
+                    "draft_history": [],
+                    "draft_mode": False
+                }
+                # Forces the cloud to overwrite with this clean slate
+                save_draft_state(empty_draft)
+                st.write("Cloud database wiped. Restarting app...")
                 st.rerun()
         if shared_draft["draft_mode"]:
             st.subheader("Website is in *DRAFT MODE*, please head to 'Draft Room'")
@@ -809,7 +824,7 @@ elif option == "Draft Room":
         username = st.session_state.get("username", "Guest")
 
         # --- PHASE 1 DISPLAY: WAITING ON BLIND HEADLINERS ---
-        if not shared_draft["headliners_resolved"]:
+        if not shared_draft.get("headliners_resolved", False):
             st.subheader("🎯 Phase 1: Headliner Submission Status")
 
             if username in shared_draft.get("coin_flip_losers", []):
@@ -1091,6 +1106,7 @@ elif option == "Trade Hub":
                 give_player = st.selectbox(
                     "Select Player you want to give",
                     shared_draft["all_teams"].get(username, []),
+                    format_func=lambda player: player.name if player else "",
                     key=f"give_player_{i}"
                 )
                 players_to_give.append(give_player)
@@ -1098,6 +1114,7 @@ elif option == "Trade Hub":
                 get_player = st.selectbox(
                     "Select Player you want to get",
                     shared_draft["all_teams"].get(other_team, []),
+                    format_func=lambda player: player.name if player else "",
                     key=f"get_player_{i}"
                 )
                 players_to_get.append(get_player)
@@ -1127,6 +1144,8 @@ elif option == "Trade Hub":
 
                 st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
                 st.session_state.trade_count = 1
+        st.subheader("TRADES RECIEVED:")
+        #...
 
 elif option == "Results":
     st.title("*RESULTS*")
