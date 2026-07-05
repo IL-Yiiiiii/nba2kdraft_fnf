@@ -1,4 +1,4 @@
-import streamlit as st, pandas as pd, random
+import streamlit as st, pandas as pd, random, time
 import streamlit_authenticator as stauth
 from streamlit_autorefresh import st_autorefresh
 import pickle
@@ -1051,13 +1051,19 @@ elif option == "Trade Hub":
                 st.rerun()
         with col_propose:
             if st.button("Propose trade"):
-                # 🛡️ 1. Check if this exact trade is already pending
+                # 🛡️ 1. Extract player names to safely check for duplicates
+                current_giving_names = [p.name for p in players_to_give if p]
+                current_getting_names = [p.name for p in players_to_get if p]
+
                 is_duplicate = False
                 for existing_trade in shared_draft.get("pending_trades", []):
+                    existing_giving_names = [p.name for p in existing_trade.get("giving", []) if p]
+                    existing_getting_names = [p.name for p in existing_trade.get("getting", []) if p]
+
                     if (existing_trade.get("from_team") == username and
                             existing_trade.get("to_team") == other_team and
-                            existing_trade.get("giving") == players_to_give and
-                            existing_trade.get("getting") == players_to_get and
+                            existing_giving_names == current_giving_names and
+                            existing_getting_names == current_getting_names and
                             existing_trade.get("status") == "pending"):
                         is_duplicate = True
                         break
@@ -1067,7 +1073,7 @@ elif option == "Trade Hub":
                 else:
                     # 🛡️ 2. Create the trade with a guaranteed unique ID
                     trade_proposal = {
-                        "id": str(uuid.uuid4()),  # Unbreakable fingerprint
+                        "id": str(uuid.uuid4()),
                         "from_team": username,
                         "to_team": other_team,
                         "giving": players_to_give,
@@ -1081,8 +1087,10 @@ elif option == "Trade Hub":
                     shared_draft["pending_trades"].append(trade_proposal)
 
                     if save_draft_state(shared_draft):
-                        st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
+                        # 🛠️ 3. Use a toast and a tiny sleep timer so it actually renders!
+                        st.toast(f"✅ Trade successfully sent to {other_team.capitalize()}!")
                         st.session_state.trade_count = 1
+                        time.sleep(1)  # Pauses for 1 second so you can see the toast
                         st.rerun()
         st.divider()
         st.subheader("📬 TRADES RECEIVED")
