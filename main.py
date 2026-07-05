@@ -312,7 +312,7 @@ def display_player(player):
                                 current_owner = draft_order_list[total_teams - curr_p]
 
                             if username != current_owner:
-                                st.error(f"⚠️ Out of turn! It is currently {current_owner}'s choice.")
+                                st.error(f"⚠️ Out of turn! It is currently {current_owner.capitalize()}'s choice.")
                                 st.stop()
 
                             # Process standard draft selection
