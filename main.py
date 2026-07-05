@@ -3,40 +3,49 @@ import streamlit_authenticator as stauth
 from streamlit_autorefresh import st_autorefresh
 import os
 import pickle
-import sys  # 👈 1. ADD THIS IMPORT
+import sys 
+import base64
+import requests
 
-DB_FILE = "draft_backup.pkl"
+# --- CLOUD DATABASE SETUP ---
+BIN_ID = st.secrets["BIN_ID"]
+API_KEY = st.secrets["API_KEY"]
+BIN_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
+HEADERS = {
+    "X-Master-Key": API_KEY,
+    "Content-Type": "application/json"
+}
 
-# ==========================================
-# 1. UPGRADED ATOMIC SAVE & SAFE LOAD HELPERS
-# ==========================================
-def save_draft_state(state_dict):
-    """Saves the current shared_draft state to a physical file atomically."""
-    tmp_file = DB_FILE + ".tmp"
-    try:
-        with open(tmp_file, "wb") as f:
-            pickle.dump(state_dict, f)
-        os.replace(tmp_file, DB_FILE)
-        return True   # 👈 Tells the app the save worked
-    except Exception as e:
-        st.error(f"💾 Failed to save draft state: {e}")
-        return False  # 👈 Tells the app to halt so you can see the error
 
 def load_draft_state():
-    """Loads the draft state from the file safely, preventing silent resets."""
-    if os.path.exists(DB_FILE):
-        try:
-            with open(DB_FILE, "rb") as f:
-                return pickle.load(f)
-        except (EOFError, FileNotFoundError):
-            # Safe fallbacks if hit during an active file switch operation
-            return None
-        except Exception as e:
-            # 🚨 Crucial: If it's a real class structure error, freeze the app
-            # and show it instead of silently resetting your entire draft!
-            st.error(f"🚨 Critical error reading draft backup file: {e}")
-            st.stop()
-    return None
+    try:
+        response = requests.get(BIN_URL, headers=HEADERS)
+        if response.status_code == 200:
+            data = response.json().get("record", {})
+            if "pickle_data" in data:
+                # Decodes the cloud text back into your Python objects
+                raw_bytes = base64.b64decode(data["pickle_data"])
+                return pickle.loads(raw_bytes)
+        return {}  # Returns empty if the bin is brand new
+    except Exception as e:
+        st.error(f"Failed to load from cloud: {e}")
+        return {}
+
+
+def save_draft_state(draft_dict):
+    try:
+        # Compresses your dictionary and Player objects into a secure string
+        raw_bytes = pickle.dumps(draft_dict)
+        encoded_string = base64.b64encode(raw_bytes).decode('utf-8')
+
+        # Fires the string into your JSONBin cloud storage
+        payload = {"pickle_data": encoded_string}
+        response = requests.put(BIN_URL, json=payload, headers=HEADERS)
+
+        return response.status_code == 200
+    except Exception as e:
+        st.error(f"Failed to save to cloud: {e}")
+        return False
 
 class Player:
     def __init__(self, name, rating, primary_pos, secondary_pos, set, ht, wt, ins, mid, three, plk, itd, prd, reb, ath, ppg, rpg, apg, mpg, spg, bpg, fgp, three_p, ftp):
@@ -1097,7 +1106,7 @@ elif option == "Trade Hub":
         with col_add:
             if st.button("Add another player"):
                 st.session_state.trade_count += 1
-                st.rerun() 
+                st.rerun()
         with col_remove:
             if st.button("Remove player") and st.session_state.trade_count > 1:
                 st.session_state.trade_count -= 1
