@@ -1082,7 +1082,6 @@ elif option == "Trade Hub":
             for idx, trade in enumerate(incoming_offers):
                 from_team = trade.get("from_team", "Unknown Team")
 
-                # Visual box for each trade offer
                 with st.container(border=True):
                     st.markdown(f"### 🫱 Over from **{from_team.capitalize()}**")
 
@@ -1091,13 +1090,13 @@ elif option == "Trade Hub":
                         st.success("🟢 **You Will Receive:**")
                         for p in trade.get("giving", []):
                             if p:
-                                st.write(f"- **{p.name}** ({p.rating} OVR | {p.position})")
+                                display_player(p)
 
                     with col_send:
                         st.error("🔴 **You Will Give Up:**")
                         for p in trade.get("getting", []):
                             if p:
-                                st.write(f"- **{p.name}** ({p.rating} OVR | {p.position})")
+                                display_player(p)
 
                     st.write("")
                     col_accept, col_decline = st.columns(2)
@@ -1166,13 +1165,13 @@ elif option == "Trade Hub":
                         st.write(f"**{from_t}** traded away:")
                         for p in trade.get("giving", []):
                             if p:
-                                st.write(f"- {p.name}")
+                                st.write(f"- {p.name}") 
 
                     with col_t2:
                         st.write(f"**{to_t}** traded away:")
                         for p in trade.get("getting", []):
                             if p:
-                                st.write(f"- {p.name}")
+                                st.write(f"- {p.name}") 
 
 elif option == "Results":
     st.title("*RESULTS*")
