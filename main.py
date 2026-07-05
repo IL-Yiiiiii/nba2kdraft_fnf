@@ -1145,6 +1145,9 @@ elif option == "Trade Hub":
                             new_their_roster = [p for p in their_roster if p.name not in items_i_gain] + [p for p in
                                                                                                           my_roster if
                                                                                                           p.name in items_i_lose]
+                            # 🧹 NEW: Re-sort both rosters by rating (highest to lowest) before saving
+                            new_my_roster.sort(key=lambda p: p.rating, reverse=True)
+                            new_their_roster.sort(key=lambda p: p.rating, reverse=True)
 
                             # Save back to database
                             shared_draft["all_teams"][username] = new_my_roster
