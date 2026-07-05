@@ -534,7 +534,7 @@ if "pending_toast" in st.session_state:
 
 # --- GLOBAL STORAGE (Shared Across All Devices) ---
 # This block runs EXACTLY ONCE when the first person boots up the website
-if not shared_draft["initialized"]:
+if not shared_draft.get("initialized", False):    
     # 1. Load available player pools from text files
     temp_players = []
     load("txt/players.txt", temp_players)
