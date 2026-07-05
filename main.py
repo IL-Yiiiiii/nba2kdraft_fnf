@@ -1154,7 +1154,7 @@ elif option == "Trade Hub":
                             trade["status"] = "accepted"
 
                             if save_draft_state(shared_draft):
-                                st.success("🎉 Trade successful! Your rosters have been updated.")
+                                st.toast("🎉 Trade successful! Your rosters have been updated.")
                                 time.sleep(3)
                                 st.rerun()
 
@@ -1163,7 +1163,7 @@ elif option == "Trade Hub":
                         if st.button("❌ Decline", key=f"decline_{unique_key}", use_container_width=True):
                             trade["status"] = "declined"
                             if save_draft_state(shared_draft):
-                                st.toast(f"Declined offer from {from_team.capitalize()}.")
+                                st.toast(f"❌ Declined offer from {from_team.capitalize()}.")
                                 time.sleep(3)
                                 st.rerun()
 
