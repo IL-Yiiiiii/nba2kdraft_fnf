@@ -1144,8 +1144,111 @@ elif option == "Trade Hub":
 
                 st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
                 st.session_state.trade_count = 1
-        st.subheader("TRADES RECIEVED:")
-        #...
+        st.subheader("📬 TRADES RECEIVED")
+
+        # Pull the list of trades safely
+        pending_trades = shared_draft.get("pending_trades", [])
+
+        # Filter for active trades sent specifically to the logged-in user
+        incoming_offers = [t for t in pending_trades if t.get("to_team") == username and t.get("status") == "pending"]
+
+        if not incoming_offers:
+            st.info("Your inbox is clear. No pending trade offers right now.")
+        else:
+            for idx, trade in enumerate(incoming_offers):
+                from_team = trade.get("from_team", "Unknown Team")
+
+                # Visual box for each trade offer
+                with st.container(border=True):
+                    st.markdown(f"### 🫱 Over from **{from_team.capitalize()}**")
+
+                    col_receive, col_send = st.columns(2)
+                    with col_receive:
+                        st.success("🟢 **You Will Receive:**")
+                        for p in trade.get("giving", []):
+                            if p:
+                                st.write(f"- **{p.name}** ({p.rating} OVR | {p.position})")
+
+                    with col_send:
+                        st.error("🔴 **You Will Give Up:**")
+                        for p in trade.get("getting", []):
+                            if p:
+                                st.write(f"- **{p.name}** ({p.rating} OVR | {p.position})")
+
+                    st.write("")
+                    col_accept, col_decline = st.columns(2)
+
+                    with col_accept:
+                        if st.button("🤝 Accept Trade", key=f"accept_{idx}_{from_team}", type="primary",
+                                     use_container_width=True):
+                            # Fetch current rosters
+                            my_roster = shared_draft["all_teams"].get(username, [])
+                            their_roster = shared_draft["all_teams"].get(from_team, [])
+
+                            # Extract names to target for swapping
+                            items_i_lose = [p.name for p in trade.get("getting", []) if p]
+                            items_i_gain = [p.name for p in trade.get("giving", []) if p]
+
+                            # Execute the multi-player roster swap
+                            new_my_roster = [p for p in my_roster if p.name not in items_i_lose] + [p for p in
+                                                                                                    their_roster if
+                                                                                                    p.name in items_i_gain]
+                            new_their_roster = [p for p in their_roster if p.name not in items_i_gain] + [p for p in
+                                                                                                          my_roster if
+                                                                                                          p.name in items_i_lose]
+
+                            # Save back to database
+                            shared_draft["all_teams"][username] = new_my_roster
+                            shared_draft["all_teams"][from_team] = new_their_roster
+
+                            # Mark this trade as resolved
+                            trade["status"] = "accepted"
+
+                            if save_draft_state(shared_draft):
+                                st.success("🎉 Trade successful! Your rosters have been updated.")
+                                st.rerun()
+
+                    with col_decline:
+                        if st.button("❌ Decline", key=f"decline_{idx}_{from_team}", use_container_width=True):
+                            trade["status"] = "declined"
+                            if save_draft_state(shared_draft):
+                                st.toast(f"Declined offer from {from_team.capitalize()}.")
+                                st.rerun()
+
+        st.divider()
+        st.subheader("📜 Trade History")
+
+        # Pull all trades safely
+        all_trades = shared_draft.get("pending_trades", [])
+
+        # Filter for trades that are no longer pending
+        resolved_trades = [t for t in all_trades if t.get("status") in ["accepted", "declined"]]
+
+        if not resolved_trades:
+            st.info("No trades have been completed yet.")
+        else:
+            # Reverse the list so the newest trades show up at the top
+            for trade in reversed(resolved_trades):
+                status = trade.get("status", "unknown")
+                status_icon = "✅" if status == "accepted" else "❌"
+                from_t = trade.get("from_team", "Unknown").capitalize()
+                to_t = trade.get("to_team", "Unknown").capitalize()
+
+                # Use an expander to keep the UI clean if there are a ton of trades
+                with st.expander(f"{status_icon} {from_t} & {to_t} ({status.capitalize()})"):
+
+                    col_t1, col_t2 = st.columns(2)
+                    with col_t1:
+                        st.write(f"**{from_t}** traded away:")
+                        for p in trade.get("giving", []):
+                            if p:
+                                st.write(f"- {p.name}")
+
+                    with col_t2:
+                        st.write(f"**{to_t}** traded away:")
+                        for p in trade.get("getting", []):
+                            if p:
+                                st.write(f"- {p.name}")
 
 elif option == "Results":
     st.title("*RESULTS*")
