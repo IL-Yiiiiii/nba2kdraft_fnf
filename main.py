@@ -1090,7 +1090,7 @@ elif option == "Trade Hub":
                         # 🛠️ 3. Use a toast and a tiny sleep timer so it actually renders!
                         st.toast(f"✅ Trade successfully sent to {other_team.capitalize()}!")
                         st.session_state.trade_count = 1
-                        time.sleep(1)  # Pauses for 1 second so you can see the toast
+                        time.sleep(3)
                         st.rerun()
         st.divider()
         st.subheader("📬 TRADES RECEIVED")
@@ -1155,6 +1155,7 @@ elif option == "Trade Hub":
 
                             if save_draft_state(shared_draft):
                                 st.success("🎉 Trade successful! Your rosters have been updated.")
+                                time.sleep(3)
                                 st.rerun()
 
                     with col_decline:
@@ -1163,6 +1164,7 @@ elif option == "Trade Hub":
                             trade["status"] = "declined"
                             if save_draft_state(shared_draft):
                                 st.toast(f"Declined offer from {from_team.capitalize()}.")
+                                time.sleep(3)
                                 st.rerun()
 
         st.divider()
