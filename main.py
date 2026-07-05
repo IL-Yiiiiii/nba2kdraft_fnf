@@ -1118,7 +1118,6 @@ elif option == "Trade Hub":
                     key=f"get_player_{i}"
                 )
                 players_to_get.append(get_player)
-        st.markdown("---")
         col_add, col_remove, col_propose = st.columns(3)
         with col_add:
             if st.button("Add another player"):
@@ -1144,6 +1143,7 @@ elif option == "Trade Hub":
 
                 st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
                 st.session_state.trade_count = 1
+        st.divider()
         st.subheader("📬 TRADES RECEIVED")
 
         # Pull the list of trades safely
