@@ -1216,7 +1216,7 @@ elif option == "Trade Hub":
                                 st.rerun()
 
         st.divider()
-        st.subheader("📜 Trade History")
+        st.subheader("📜 TRADE HISTORY")
 
         # Pull all trades safely
         all_trades = shared_draft.get("pending_trades", [])
