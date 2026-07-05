@@ -3,14 +3,13 @@ import streamlit_authenticator as stauth
 from streamlit_autorefresh import st_autorefresh
 import os
 import pickle
-import sys 
+import sys
 import base64
 import requests
-st.write("🕵️‍♂️ Secrets found by app:", list(st.secrets.keys()))
 
 # --- CLOUD DATABASE SETUP ---
-BIN_ID = st.secrets["BIN_ID"]
-API_KEY = st.secrets["API_KEY"]
+BIN_ID = st.secrets["database"]["BIN_ID"]
+API_KEY = st.secrets["database"]["API_KEY"]
 BIN_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
 HEADERS = {
     "X-Master-Key": API_KEY,
