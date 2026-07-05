@@ -4,6 +4,7 @@ from streamlit_autorefresh import st_autorefresh
 import pickle
 import base64
 import requests
+import uuid
 from player import Player
 
 # --- CLOUD DATABASE SETUP ---
@@ -1050,23 +1051,39 @@ elif option == "Trade Hub":
                 st.rerun()
         with col_propose:
             if st.button("Propose trade"):
-                trade_proposal = {
-                    "from_team": username,
-                    "to_team": other_team,
-                    "giving": players_to_give,
-                    "getting": players_to_get,
-                    "status": "pending"
-                }
-                if "pending_trades" not in shared_draft:
-                    shared_draft["pending_trades"] = []
+                # 🛡️ 1. Check if this exact trade is already pending
+                is_duplicate = False
+                for existing_trade in shared_draft.get("pending_trades", []):
+                    if (existing_trade.get("from_team") == username and
+                            existing_trade.get("to_team") == other_team and
+                            existing_trade.get("giving") == players_to_give and
+                            existing_trade.get("getting") == players_to_get and
+                            existing_trade.get("status") == "pending"):
+                        is_duplicate = True
+                        break
 
-                shared_draft["pending_trades"].append(trade_proposal)
+                if is_duplicate:
+                    st.error("⚠️ You already proposed this exact trade. Wait for them to respond!")
+                else:
+                    # 🛡️ 2. Create the trade with a guaranteed unique ID
+                    trade_proposal = {
+                        "id": str(uuid.uuid4()),  # Unbreakable fingerprint
+                        "from_team": username,
+                        "to_team": other_team,
+                        "giving": players_to_give,
+                        "getting": players_to_get,
+                        "status": "pending"
+                    }
 
-                # 💾 THIS IS THE MISSING PIECE! Push the trade to the cloud.
-                if save_draft_state(shared_draft):
-                    st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
-                    st.session_state.trade_count = 1
-                    st.rerun()  # Refresh so the UI clears out
+                    if "pending_trades" not in shared_draft:
+                        shared_draft["pending_trades"] = []
+
+                    shared_draft["pending_trades"].append(trade_proposal)
+
+                    if save_draft_state(shared_draft):
+                        st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
+                        st.session_state.trade_count = 1
+                        st.rerun()
         st.divider()
         st.subheader("📬 TRADES RECEIVED")
 
@@ -1102,7 +1119,9 @@ elif option == "Trade Hub":
                     col_accept, col_decline = st.columns(2)
 
                     with col_accept:
-                        if st.button("🤝 Accept Trade", key=f"accept_{idx}_{from_team}", use_container_width=True):
+                        # Using trade.get("id") as the ultimate key
+                        unique_key = trade.get("id", f"backup_{idx}")
+                        if st.button("🤝 Accept Trade", key=f"accept_{unique_key}", use_container_width=True)
                             # Fetch current rosters
                             my_roster = shared_draft["all_teams"].get(username, [])
                             their_roster = shared_draft["all_teams"].get(from_team, [])
@@ -1131,6 +1150,8 @@ elif option == "Trade Hub":
                                 st.rerun()
 
                     with col_decline:
+                        unique_key = trade.get("id", f"backup_{idx}")
+                        if st.button("❌ Decline", key=f"decline_{unique_key}", use_container_width=True):
                         if st.button("❌ Decline", key=f"decline_{idx}_{from_team}", use_container_width=True):
                             trade["status"] = "declined"
                             if save_draft_state(shared_draft):
