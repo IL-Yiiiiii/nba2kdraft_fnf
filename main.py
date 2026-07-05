@@ -1156,14 +1156,14 @@ elif option == "Trade Hub":
                                 st.rerun()
                         st.markdown('</div>', unsafe_allow_html=True)  # Close the green wrapper
 
-                                with col_decline:
-                                    # 🔴 Keep type="primary" so Streamlit makes this one your theme's red
-                                    if st.button("❌ Decline", key=f"decline_{idx}_{from_team}", type="primary",
-                                                 use_container_width=True):
-                                        trade["status"] = "declined"
-                                        if save_draft_state(shared_draft):
-                                            st.toast(f"Declined offer from {from_team.capitalize()}.")
-                                            st.rerun()
+                    with col_decline:
+                        # 🔴 Keep type="primary" so Streamlit makes this one your theme's red
+                        if st.button("❌ Decline", key=f"decline_{idx}_{from_team}", type="primary",
+                                     use_container_width=True):
+                            trade["status"] = "declined"
+                            if save_draft_state(shared_draft):
+                                st.toast(f"Declined offer from {from_team.capitalize()}.")
+                                st.rerun()
 
         st.divider()
         st.subheader("📜 TRADE HISTORY")
@@ -1192,13 +1192,13 @@ elif option == "Trade Hub":
                         st.write(f"**{from_t}** traded away:")
                         for p in trade.get("giving", []):
                             if p:
-                                st.write(f"- {p.name}") 
+                                st.write(f"- {p.name}")
 
                     with col_t2:
                         st.write(f"**{to_t}** traded away:")
                         for p in trade.get("getting", []):
                             if p:
-                                st.write(f"- {p.name}") 
+                                st.write(f"- {p.name}")
 
 elif option == "Results":
     st.title("*RESULTS*")
