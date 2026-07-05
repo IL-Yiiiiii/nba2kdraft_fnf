@@ -1091,8 +1091,8 @@ elif option == "Trade Hub":
         st.subheader("PROPOSE TRADE:")
         other_team = st.selectbox(
             "Select other team",
-            shared_draft["draft_order"],
-            format_func=lambda name: name.capitalize(),
+            shared_draft.get("draft_order", []),
+            format_func=lambda name: name.capitalize() if name else "",
             key="other_team"
         )
         if "trade_count" not in st.session_state:
