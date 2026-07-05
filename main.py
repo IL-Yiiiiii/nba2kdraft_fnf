@@ -1141,8 +1141,11 @@ elif option == "Trade Hub":
 
                 shared_draft["pending_trades"].append(trade_proposal)
 
-                st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
-                st.session_state.trade_count = 1
+                # 💾 THIS IS THE MISSING PIECE! Push the trade to the cloud.
+                if save_draft_state(shared_draft):
+                    st.success(f"✅ The trade has been sent to {other_team.capitalize()}!")
+                    st.session_state.trade_count = 1
+                    st.rerun()  # Refresh so the UI clears out
         st.divider()
         st.subheader("📬 TRADES RECEIVED")
 
