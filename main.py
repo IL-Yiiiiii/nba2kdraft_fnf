@@ -741,7 +741,7 @@ elif option == "Draft Room":
 
     st.title("*DRAFT ROOM*")
     if not shared_draft["draft_mode"]:
-        st.warning("🚨 The draft has not started yet! Waiting on the admin to initiate...")
+        st.warning("🚨 The draft has not started yet!")
 
     else:
         username = st.session_state.get("username", "Guest")
