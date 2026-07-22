@@ -15,6 +15,10 @@ redis = Redis(
     token=st.secrets["UPSTASH_REDIS_REST_TOKEN"]
 )
 
+# Temporary debugging line
+st.write("Loaded secret keys:", list(st.secrets.keys()))
+st.stop() # Stops the app here so it doesn't crash on the next line
+
 # --- CLOUD DATABASE SETUP ---
 def fetch_draft_state():
     try:
