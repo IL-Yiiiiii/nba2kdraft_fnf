@@ -451,25 +451,28 @@ if not shared_draft.get("initialized", False):
     add_desc("txt/players_desc.txt", temp_players)
     shared_draft["player_array"] = temp_players
     add_pics("txt/playerspics.txt", shared_draft["player_array"])
-    
+
     temp_t1 = []
     load("txt/tier1.txt", temp_t1)
     add_desc("txt/tier1desc.txt", temp_t1)
     shared_draft["t1_array"] = temp_t1
     add_pics("txt/tier1pics.txt", shared_draft["t1_array"])
-    
+
     # 2. Initialize empty global draft tracking lists
     shared_draft["drafted_player_array"] = []
     shared_draft["drafted_t1_array"] = []
-    
+
     # 3. Initialize multi-user team rosters & draft mechanics
     shared_draft["all_teams"] = {}
     shared_draft["picks_made"] = 0
     shared_draft["draft_mode"] = False
-    
-    # Flip the master switch & SAVE TO REDIS
+
+    # 👇 ADD THESE TWO LINES TO PREVENT KEYERRORS 👇
+    shared_draft["headliners_resolved"] = False
+    shared_draft["headliner_picks"] = {}
+
+    # Flip the master switch
     shared_draft["initialized"] = True
-    save_draft_state(shared_draft)
 # --------------------------------------
 option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
 if shared_draft["draft_mode"]:
