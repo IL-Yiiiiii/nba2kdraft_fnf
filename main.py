@@ -18,33 +18,20 @@ redis = Redis(
 # --- CLOUD DATABASE SETUP ---
 def load_draft_state():
     try:
-        # 1. Pull the data from Upstash
         data_str = redis.get("shared_draft_state")
-        
-        # 2. If it's a completely new database, auto-initialize it with zero data!
         if not data_str:
-            initial_state = {
-                "draft_order": [],
-                "current_pick": 0,
-                "headliners_resolved": False,
-                "all_teams": {},
-                "pending_trades": [],
-                "draft_log": []
-            }
-            redis.set("shared_draft_state", json.dumps(initial_state))
-            return initial_state
-            
-        # 3. Return the active draft data
-        return json.loads(data_str)
-        
+            return None
+        # Safely convert base64 text back into Python objects
+        return pickle.loads(base64.b64decode(data_str.encode('utf-8')))
     except Exception as e:
         st.error(f"Database read error: {e}")
-        return st.session_state.get("last_valid_draft_state", {})
+        return None
 
 def save_draft_state(state):
     try:
-        # Push the updated draft layout up to Upstash
-        redis.set("shared_draft_state", json.dumps(state))
+        # Convert custom Player objects & python dicts into a safe string format
+        serialized_data = base64.b64encode(pickle.dumps(state)).decode('utf-8')
+        redis.set("shared_draft_state", serialized_data)
         return True
     except Exception as e:
         st.error(f"Database write error: {e}")
@@ -458,7 +445,6 @@ if "pending_toast" in st.session_state:
     del st.session_state.pending_toast
 
 # --- GLOBAL STORAGE (Shared Across All Devices) ---
-# This block runs EXACTLY ONCE when the first person boots up the website
 if not shared_draft.get("initialized", False):
     # 1. Load available player pools from text files
     temp_players = []
@@ -466,20 +452,25 @@ if not shared_draft.get("initialized", False):
     add_desc("txt/players_desc.txt", temp_players)
     shared_draft["player_array"] = temp_players
     add_pics("txt/playerspics.txt", shared_draft["player_array"])
+    
     temp_t1 = []
     load("txt/tier1.txt", temp_t1)
     add_desc("txt/tier1desc.txt", temp_t1)
     shared_draft["t1_array"] = temp_t1
     add_pics("txt/tier1pics.txt", shared_draft["t1_array"])
+    
     # 2. Initialize empty global draft tracking lists
     shared_draft["drafted_player_array"] = []
     shared_draft["drafted_t1_array"] = []
+    
     # 3. Initialize multi-user team rosters & draft mechanics
     shared_draft["all_teams"] = {}
     shared_draft["picks_made"] = 0
     shared_draft["draft_mode"] = False
-    # Flip the master switch so the server remembers this data is ready
+    
+    # Flip the master switch & SAVE TO REDIS
     shared_draft["initialized"] = True
+    save_draft_state(shared_draft)
 # --------------------------------------
 option = st.sidebar.selectbox("Menu", ["Start", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub", "Results"])
 if shared_draft["draft_mode"]:
