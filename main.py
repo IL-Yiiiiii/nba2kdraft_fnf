@@ -11,8 +11,8 @@ import json
 
 # Initialize Upstash Redis client
 redis = Redis(
-    url=st.secrets["REDIS_URL"], 
-    token=st.secrets["REDIS_TOKEN"]
+    url=st.secrets["UPSTASH_REDIS_REST_URL"], 
+    token=st.secrets["UPSTASH_REDIS_REST_TOKEN"]
 )
 
 # --- CLOUD DATABASE SETUP ---
