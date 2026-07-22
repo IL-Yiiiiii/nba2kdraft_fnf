@@ -465,7 +465,6 @@ if not shared_draft.get("initialized", False):
     shared_draft["all_teams"] = {}
     shared_draft["picks_made"] = 0
     shared_draft["draft_mode"] = False
-    shared_draft["headliners_resolved"] = False
     
     # Flip the master switch & SAVE TO REDIS
     shared_draft["initialized"] = True
