@@ -21,7 +21,7 @@ def save_draft_state(data):
         # Convert dictionary to raw bytes, then encode to base64 string
         serialized = base64.b64encode(pickle.dumps(data)).decode("utf-8")
         redis.set("draft_state_v2", serialized)
-        return True  # 👈 Add this line!
+        return True 
     except Exception as e:
         st.error(f"Database write error: {e}")
         return False
