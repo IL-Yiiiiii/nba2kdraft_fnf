@@ -180,7 +180,7 @@ def display_player(player):
                             drafted_confirm = True
 
                         # --- PHASE 1: BLIND HEADLINERS ---
-                        elif shared_draft["draft_mode"] and not shared_draft["headliners_resolved"]:
+                        elif shared_draft["draft_mode"] and not shared_draft.get("headliners_resolved", False):
                             in_t1 = any(p.name == player.name for p in shared_draft["t1_array"])
 
                             if not in_t1:
@@ -465,6 +465,7 @@ if not shared_draft.get("initialized", False):
     shared_draft["all_teams"] = {}
     shared_draft["picks_made"] = 0
     shared_draft["draft_mode"] = False
+    shared_draft["headliners_resolved"] = False
     
     # Flip the master switch & SAVE TO REDIS
     shared_draft["initialized"] = True
