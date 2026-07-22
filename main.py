@@ -49,6 +49,7 @@ def save_draft_state(state):
     except Exception as e:
         st.error(f"Database write error: {e}")
         return False
+        
 def load(file, array):
     try:
         with open(file) as f:
