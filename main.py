@@ -16,7 +16,7 @@ redis = Redis(
 )
 
 # --- CLOUD DATABASE SETUP ---
-def fetch_draft_state():
+def load_draft_state():
     try:
         # 1. Pull the data from Upstash
         data_str = redis.get("shared_draft_state")
