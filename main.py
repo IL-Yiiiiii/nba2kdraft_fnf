@@ -6,47 +6,49 @@ import base64
 import requests
 import uuid
 from player import Player
+from upstash_redis import Redis
+import json
+
+# Initialize Upstash Redis client
+redis = Redis(
+    url=st.secrets["REDIS_URL"], 
+    token=st.secrets["REDIS_TOKEN"]
+)
 
 # --- CLOUD DATABASE SETUP ---
-BIN_ID = st.secrets["database"]["BIN_ID"]
-API_KEY = st.secrets["database"]["API_KEY"]
-BIN_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
-HEADERS = {
-    "X-Master-Key": API_KEY,
-    "Content-Type": "application/json"
-}
-
-
-def load_draft_state():
+def fetch_draft_state():
     try:
-        response = requests.get(BIN_URL, headers=HEADERS)
-        if response.status_code == 200:
-            data = response.json().get("record", {})
-            if "pickle_data" in data:
-                # Decodes the cloud text back into your Python objects
-                raw_bytes = base64.b64decode(data["pickle_data"])
-                return pickle.loads(raw_bytes)
-        return {}  # Returns empty if the bin is brand new
+        # 1. Pull the data from Upstash
+        data_str = redis.get("shared_draft_state")
+        
+        # 2. If it's a completely new database, auto-initialize it with zero data!
+        if not data_str:
+            initial_state = {
+                "draft_order": [],
+                "current_pick": 0,
+                "headliners_resolved": False,
+                "all_teams": {},
+                "pending_trades": [],
+                "draft_log": []
+            }
+            redis.set("shared_draft_state", json.dumps(initial_state))
+            return initial_state
+            
+        # 3. Return the active draft data
+        return json.loads(data_str)
+        
     except Exception as e:
-        st.error(f"Failed to load from cloud: {e}")
-        return {}
+        st.error(f"Database read error: {e}")
+        return st.session_state.get("last_valid_draft_state", {})
 
-
-def save_draft_state(draft_dict):
+def save_draft_state(state):
     try:
-        # Compresses your dictionary and Player objects into a secure string
-        raw_bytes = pickle.dumps(draft_dict)
-        encoded_string = base64.b64encode(raw_bytes).decode('utf-8')
-
-        # Fires the string into your JSONBin cloud storage
-        payload = {"pickle_data": encoded_string}
-        response = requests.put(BIN_URL, json=payload, headers=HEADERS)
-
-        return response.status_code == 200
+        # Push the updated draft layout up to Upstash
+        redis.set("shared_draft_state", json.dumps(state))
+        return True
     except Exception as e:
-        st.error(f"Failed to save to cloud: {e}")
+        st.error(f"Database write error: {e}")
         return False
-
 def load(file, array):
     try:
         with open(file) as f:
