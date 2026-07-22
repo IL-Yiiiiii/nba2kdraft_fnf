@@ -16,26 +16,24 @@ redis = Redis(
 )
 
 # --- CLOUD DATABASE SETUP ---
-def load_draft_state():
+def save_draft_state(data):
     try:
-        data_str = redis.get("shared_draft_state")
-        if not data_str:
-            return None
-        # Safely convert base64 text back into Python objects
-        return pickle.loads(base64.b64decode(data_str.encode('utf-8')))
-    except Exception as e:
-        st.error(f"Database read error: {e}")
-        return None
-
-def save_draft_state(state):
-    try:
-        # Convert custom Player objects & python dicts into a safe string format
-        serialized_data = base64.b64encode(pickle.dumps(state)).decode('utf-8')
-        redis.set("shared_draft_state", serialized_data)
-        return True
+        # Convert dictionary to raw bytes, then encode to base64 string
+        serialized = base64.b64encode(pickle.dumps(data)).decode("utf-8")
+        redis.set("draft_state_v2", serialized)
     except Exception as e:
         st.error(f"Database write error: {e}")
-        return False
+
+
+def load_draft_state():
+    try:
+        raw_data = redis.get("draft_state_v2")
+        if raw_data:
+            # Decode base64 back to raw bytes, then unpickle back to dictionary
+            return pickle.loads(base64.b64decode(raw_data))
+    except Exception as e:
+        st.error(f"Database read error: {e}")
+    return {}
         
 def load(file, array):
     try:
