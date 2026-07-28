@@ -142,6 +142,7 @@ def display_player(player):
             st.write("")
             st.write(player.desc)
             col_compare, col_draft = st.columns([1, 1])
+            
             with col_compare:
                 if st.button("Compare Player", key=f"compare_button_{player.name}"):
                     already_added = any(p.name == player.name for p in st.session_state.compare_array)
@@ -150,108 +151,128 @@ def display_player(player):
                         st.session_state.compare_array.append(player.clone())
                     else:
                         added_already = True
+                        
             with col_draft:
-                if st.button("Draft Player", key=f"draft_button_{player.name}"):
-                    already_drafted = (any(p.name == player.name for p in shared_draft["drafted_player_array"]) or
-                                       any(p.name == player.name for p in shared_draft["drafted_t1_array"]))
+                # --- NEW CONFIRMATION BANNER LOGIC ---
+                is_confirming = st.session_state.get("confirming_player") == player.name
 
-                    if already_drafted:
-                        drafted_already = True
-                    else:
-                        # --- PRE-DRAFT / PRACTICE MODE (Your Original Logic) ---
-                        if not shared_draft["draft_mode"]:
-                            in_regular = any(p.name == player.name for p in shared_draft["player_array"])
-                            in_t1 = any(p.name == player.name for p in shared_draft["t1_array"])
-
-                            if in_regular:
-                                shared_draft["drafted_player_array"].append(player.clone())
-                                shared_draft["player_array"] = [p for p in shared_draft["player_array"] if
-                                                                p.name != player.name]
-                            elif in_t1:
-                                shared_draft["drafted_t1_array"].append(player.clone())
-                                shared_draft["t1_array"] = [p for p in shared_draft["t1_array"] if
-                                                            p.name != player.name]
-
-                            # Add to the active user's global team dictionary entry
-                            if username not in shared_draft["all_teams"]:
-                                shared_draft["all_teams"][username] = []
-                            shared_draft["all_teams"][username].append(player.clone())
-                            shared_draft["all_teams"][username].sort(key=lambda x: int(x.rating), reverse=True)
-
-                            drafted_confirm = True
-
-                        # --- PHASE 1: BLIND HEADLINERS ---
-                        elif shared_draft["draft_mode"] and not shared_draft.get("headliners_resolved", False):
-                            in_t1 = any(p.name == player.name for p in shared_draft["t1_array"])
-
-                            if not in_t1:
-                                st.error("⚠️ The draft hasn't officially started yet! Go pick a Headliner first.")
-                                st.stop()
-
-                            # Register their blind choice
-                            shared_draft["headliner_picks"][username] = player.name
-
-                            # Clear them from the losers list if they are submitting a backup choice
-                            if username in shared_draft.get("coin_flip_losers", []):
-                                shared_draft["coin_flip_losers"].remove(username)
-
-                            save_draft_state(shared_draft)  # 💾 ADD THIS LINE HERE!
-
-                            st.session_state.pending_toast = {"message": f"🔒 Locked in choice: {player.name}!",
-                                                              "icon": "🎯"}
+                if not is_confirming:
+                    if st.button("Draft Player", key=f"draft_button_{player.name}"):
+                        st.session_state.confirming_player = player.name
+                        st.rerun()
+                else:
+                    st.warning(f"🚨 Draft **{player.name}**?")
+                    col_y, col_n = st.columns(2)
+                    
+                    with col_n:
+                        if st.button("❌ Cancel", key=f"cancel_draft_{player.name}"):
+                            st.session_state.confirming_player = None
                             st.rerun()
+                            
+                    with col_y:
+                        if st.button("✅ Yes", key=f"yes_draft_{player.name}"):
+                            st.session_state.confirming_player = None # Reset confirmation state
+                            
+                            already_drafted = (any(p.name == player.name for p in shared_draft["drafted_player_array"]) or
+                                               any(p.name == player.name for p in shared_draft["drafted_t1_array"]))
 
-                         # --- PHASE 2: LIVE SERPENTINE DRAFT ---
-                        elif shared_draft["draft_mode"] and shared_draft["headliners_resolved"]:
-                            draft_order_list = shared_draft.get("draft_order", [])
-                            total_teams = len(draft_order_list)
-
-                            # Defensive Check: Is the order actually set up?
-                            if total_teams == 0:
-                                st.error("🚨 The Draft Order hasn't been set up yet! It's currently empty.")
-                                st.stop()
-
-                            # Safe turn calculation based on actual team count
-                            current_pick_idx = len(shared_draft.get("draft_history", []))
-                            curr_r = (current_pick_idx // total_teams) + 1
-                            curr_p = (current_pick_idx % total_teams) + 1
-
-                            # Serpentine math
-                            if curr_r % 2 != 0:
-                                current_owner = draft_order_list[curr_p - 1]
+                            if already_drafted:
+                                drafted_already = True
                             else:
-                                current_owner = draft_order_list[total_teams - curr_p]
+                                # --- PRE-DRAFT / PRACTICE MODE ---
+                                if not shared_draft["draft_mode"]:
+                                    in_regular = any(p.name == player.name for p in shared_draft["player_array"])
+                                    in_t1 = any(p.name == player.name for p in shared_draft["t1_array"])
 
-                            if username != current_owner:
-                                st.error(f"⚠️ Out of turn! It is currently {current_owner.capitalize()}'s choice.")
-                                st.stop()
+                                    if in_regular:
+                                        shared_draft["drafted_player_array"].append(player.clone())
+                                        shared_draft["player_array"] = [p for p in shared_draft["player_array"] if
+                                                                        p.name != player.name]
+                                    elif in_t1:
+                                        shared_draft["drafted_t1_array"].append(player.clone())
+                                        shared_draft["t1_array"] = [p for p in shared_draft["t1_array"] if
+                                                                    p.name != player.name]
 
-                            # Process standard draft selection
-                            in_regular = any(p.name == player.name for p in shared_draft["player_array"])
-                            in_t1 = any(p.name == player.name for p in shared_draft["t1_array"])
+                                    # Add to the active user's global team dictionary entry
+                                    if username not in shared_draft["all_teams"]:
+                                        shared_draft["all_teams"][username] = []
+                                    shared_draft["all_teams"][username].append(player.clone())
+                                    shared_draft["all_teams"][username].sort(key=lambda x: int(x.rating), reverse=True)
 
-                            if in_regular:
-                                shared_draft["drafted_player_array"].append(player.clone())
-                                shared_draft["player_array"] = [p for p in shared_draft["player_array"] if
-                                                                p.name != player.name]
-                            elif in_t1:
-                                shared_draft["drafted_t1_array"].append(player.clone())
-                                shared_draft["t1_array"] = [p for p in shared_draft["t1_array"] if
-                                                            p.name != player.name]
+                                    drafted_confirm = True
 
-                            if username not in shared_draft["all_teams"]:
-                                shared_draft["all_teams"][username] = []
-                            shared_draft["all_teams"][username].append(player.clone())
-                            shared_draft["all_teams"][username].sort(key=lambda x: int(x.rating), reverse=True)
+                                # --- PHASE 1: BLIND HEADLINERS ---
+                                elif shared_draft["draft_mode"] and not shared_draft.get("headliners_resolved", False):
+                                    in_t1 = any(p.name == player.name for p in shared_draft["t1_array"])
 
-                            # Log onto progress timeline
-                            if "draft_history" not in shared_draft:
-                                shared_draft["draft_history"] = []
-                            shared_draft["draft_history"].append(f"{player.name} ({player.rating} OVR)")
+                                    if not in_t1:
+                                        st.error("⚠️ The draft hasn't officially started yet! Go pick a Headliner first.")
+                                        st.stop()
 
-                            drafted_confirm = True
+                                    # Register their blind choice
+                                    shared_draft["headliner_picks"][username] = player.name
 
-                # HTML/Toast warning rendering remains the same...
+                                    # Clear them from the losers list if they are submitting a backup choice
+                                    if username in shared_draft.get("coin_flip_losers", []):
+                                        shared_draft["coin_flip_losers"].remove(username)
+
+                                    save_draft_state(shared_draft)
+
+                                    st.session_state.pending_toast = {"message": f"🔒 Locked in choice: {player.name}!",
+                                                                      "icon": "🎯"}
+                                    st.rerun()
+
+                                 # --- PHASE 2: LIVE SERPENTINE DRAFT ---
+                                elif shared_draft["draft_mode"] and shared_draft["headliners_resolved"]:
+                                    draft_order_list = shared_draft.get("draft_order", [])
+                                    total_teams = len(draft_order_list)
+
+                                    # Defensive Check: Is the order actually set up?
+                                    if total_teams == 0:
+                                        st.error("🚨 The Draft Order hasn't been set up yet! It's currently empty.")
+                                        st.stop()
+
+                                    # Safe turn calculation based on actual team count
+                                    current_pick_idx = len(shared_draft.get("draft_history", []))
+                                    curr_r = (current_pick_idx // total_teams) + 1
+                                    curr_p = (current_pick_idx % total_teams) + 1
+
+                                    # Serpentine math
+                                    if curr_r % 2 != 0:
+                                        current_owner = draft_order_list[curr_p - 1]
+                                    else:
+                                        current_owner = draft_order_list[total_teams - curr_p]
+
+                                    if username != current_owner:
+                                        st.error(f"⚠️ Out of turn! It is currently {current_owner.capitalize()}'s choice.")
+                                        st.stop()
+
+                                    # Process standard draft selection
+                                    in_regular = any(p.name == player.name for p in shared_draft["player_array"])
+                                    in_t1 = any(p.name == player.name for p in shared_draft["t1_array"])
+
+                                    if in_regular:
+                                        shared_draft["drafted_player_array"].append(player.clone())
+                                        shared_draft["player_array"] = [p for p in shared_draft["player_array"] if
+                                                                        p.name != player.name]
+                                    elif in_t1:
+                                        shared_draft["drafted_t1_array"].append(player.clone())
+                                        shared_draft["t1_array"] = [p for p in shared_draft["t1_array"] if
+                                                                    p.name != player.name]
+
+                                    if username not in shared_draft["all_teams"]:
+                                        shared_draft["all_teams"][username] = []
+                                    shared_draft["all_teams"][username].append(player.clone())
+                                    shared_draft["all_teams"][username].sort(key=lambda x: int(x.rating), reverse=True)
+
+                                    # Log onto progress timeline
+                                    if "draft_history" not in shared_draft:
+                                        shared_draft["draft_history"] = []
+                                    shared_draft["draft_history"].append(f"{player.name} ({player.rating} OVR)")
+
+                                    drafted_confirm = True
+
+                # HTML/Toast warning rendering
                 if added_confirm:
                     st.markdown(
                         f"<div style='background-color: #213d3b; padding: 10px; border-radius: 5px; color: #8afffd; text-align: center; font-style: italic;'>{player.name} added to compare!</div>",
@@ -278,7 +299,7 @@ def display_player(player):
                     if save_draft_state(shared_draft):
                         st.rerun()
 
-        # Attribute and Stats layout section remains unchanged below this...
+        # Attribute and Stats layout section
         st.markdown("---")
         col_gap1, col_ats_title, col_gap2, col_stats_title1 = st.columns([0.6, 5.3, 1, 8])
         with col_ats_title:
@@ -442,6 +463,8 @@ if "compare_df" not in st.session_state:
 if "pending_toast" in st.session_state:
     st.toast(st.session_state.pending_toast["message"], icon=st.session_state.pending_toast["icon"])
     del st.session_state.pending_toast
+if "confirming_player" not in st.session_state:
+    st.session_state.confirming_player = None
 
 # --- GLOBAL STORAGE (Shared Across All Devices) ---
 if not shared_draft.get("initialized", False):
