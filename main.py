@@ -1228,7 +1228,9 @@ elif option == "Trade Hub":
 elif option == "Results":
     st.title("*RESULTS*")
     st.subheader("**< YEAR 1 >**")
-    st.write("*WAITING!*")
+    st.write("**MVP: Shaq**")
+    st.write("**Quarter Finals**")
+    st.write("**[1]** *Enze* (4-1) *Knicks* **[8]**")
     st.subheader("**< YEAR 2 >**")
     st.write("*WAITING!*")
     st.subheader("**< YEAR 3 >**")
