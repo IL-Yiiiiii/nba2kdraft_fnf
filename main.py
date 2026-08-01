@@ -1239,7 +1239,7 @@ elif option == "Results":
     st.write("**[3]** *Joydeep* (2-4) *Daniel* **[7]**")
     st.write("**Finals**")
     st.write("**[5]** *Zach* (3-4) *Daniel* **[7]**")
-    st.write("**FMVP: **")
+    st.write("**FMVP: Michael Jordan**")
     st.subheader("**< YEAR 2 >**")
     st.write("*WAITING!*")
     st.subheader("**< YEAR 3 >**")
