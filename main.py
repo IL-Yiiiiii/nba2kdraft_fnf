@@ -1227,6 +1227,7 @@ elif option == "Trade Hub":
 
 elif option == "Results":
     st.title("*RESULTS*")
+    st.divider()
     st.subheader("**< YEAR 1 >**")
     st.write("**MVP: Shaq**")
     st.write("**Quarter Finals**")
@@ -1240,6 +1241,7 @@ elif option == "Results":
     st.write("**Finals**")
     st.write("**[5]** *Zach* (3-4) *Daniel* **[7]**")
     st.write("**FMVP: Michael Jordan**")
+    st.divider()
     st.subheader("**< YEAR 2 >**")
     st.write("**MVP: Shaq**")
     st.write("**Quarter Finals**")
@@ -1247,7 +1249,10 @@ elif option == "Results":
     st.write("**[2]** *Joydeep* (??) *Joshua* **[7]**")
     st.write("**[3]** *Aashutosh* (??) *Daniel* **[6]**")
     st.write("**[4]** *Zach* (??) *Isaac* **[5]**")
-    st.write("*WAITING!*")
+    st.write("**Semi Finals**")
+    st.write("**Finals**")
+    st.write("**FMVP: **")
+    st.divider()
     st.subheader("**< YEAR 3 >**")
     st.write("*WAITING!*")
     st.subheader("**< YEAR 4 >**")
