@@ -1269,6 +1269,7 @@ elif option == "Results":
     st.write("**Finals**")
     st.write("**[2]** *Enze* (?-?) *Aashutosh* **[5]**")
     st.write("**FMVP: **")
+    st.divider()
     st.subheader("**< YEAR 4 >**")
     st.write("*WAITING!*")
     st.subheader("**< YEAR 5 >**")
