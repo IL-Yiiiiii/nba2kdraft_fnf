@@ -1278,6 +1278,7 @@ elif option == "Results":
     st.write("**[3]** *Joshua* (?-?) *Isaac* **[6]**")
     st.write("**[4]** *Daniel* (1-4) *Aashutosh* **[5]**")
     st.write("**Semi Finals**")
+    st.write("**[1]** *Enze* (?-?) *Aashutosh* **[5]**")
     st.write("*WAITING!*")
     st.subheader("**< YEAR 5 >**")
     st.write("*WAITING!*")
