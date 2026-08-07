@@ -1265,7 +1265,7 @@ elif option == "Results":
     st.write("**[4]** *Daniel* (3-4) *Aashutosh* **[5]**")
     st.write("**Semi Finals**")
     st.write("**[1]** *Zach* (3-4) *Aashutosh* **[5]**")
-    st.write("**[2]** *Enze* (4-1) Joshua* **[6]**")
+    st.write("**[2]** *Enze* (4-1) *Joshua* **[6]**")
     st.write("**Finals**")
     st.write("**[2]** *Enze* (4-2) *Aashutosh* **[5]**")
     st.write("**FMVP: Shaquille O'Neal**")
