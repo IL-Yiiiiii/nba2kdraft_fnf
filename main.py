@@ -1279,7 +1279,7 @@ elif option == "Results":
     st.write("**[4]** *Daniel* (1-4) *Aashutosh* **[5]**")
     st.write("**Semi Finals**")
     st.write("**[1]** *Enze* (?-?) *Aashutosh* **[5]**")
-    st.write("**[6]** *Isaac* (?-?) *Zach* **[7]**")
+    st.write("**[6]** *Isaac* (2-4) *Zach* **[7]**")
     st.write("**Finals**")
     st.write("*WAITING!*")
     st.write("**FMVP: ?**")
