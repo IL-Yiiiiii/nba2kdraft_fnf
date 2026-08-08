@@ -1294,7 +1294,7 @@ elif option == "Results":
     st.write("*WAITING!*")
 
 elif option == "Rankings":
-    st.title("*RANKINGS*")
+    st.title("*CURRENT RANKINGS*")
     st.subheader("**1) Enze - 3 Championships**")
     st.subheader("**2) Daniel - 1 Championship**")
     st.subheader("**3) Zach - 2 Finals, 2 Semi-Finals**")
