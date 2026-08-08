@@ -497,7 +497,7 @@ if not shared_draft.get("initialized", False):
     # Flip the master switch
     shared_draft["initialized"] = True
 # --------------------------------------
-option = st.sidebar.selectbox("Menu", ["Start", "Results", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub"])
+option = st.sidebar.selectbox("Menu", ["Start", "Results", "Rankings", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub"])
 if shared_draft["draft_mode"]:
     username = st.session_state.get("username", "Guest")
 
@@ -1292,3 +1292,13 @@ elif option == "Results":
     st.divider()
     st.subheader("**< YEAR 7 >**")
     st.write("*WAITING!*")
+
+elif option == "Rankings":
+    st.title("*RANKINGS*")
+    st.subheader("**1) Enze - 3 Championships**")
+    st.subheader("**2) Daniel - 1 Championship**")
+    st.subheader("**3) Zach - 2 Finals, 2 Semi-Finals**")
+    st.subheader("**4) Aashutosh - 1 Final, 2 Semi-Finals, 1 Quarter-Final**")
+    st.subheader("**5) Joydeep - 1 Final, 1 Semi-Final, 2 Quarter-Finals**")
+    st.subheader("**6) Joshua - 1 Semi-Final, 3 Quarter-Finals**")
+    st.subheader("**6) Isaac - 1 Semi-Final, 3 Quarter-Finals**")
