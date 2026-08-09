@@ -1294,7 +1294,7 @@ elif option == "Results":
     st.write("*WAITING!*")
 
 elif option == "Rankings":
-    st.title("*SAVE 1 FINAL RANKINGS (4 Years Played)*")
+    st.title("*SAVE 1 FINAL RANKINGS*")
     st.subheader(f":yellow[{"Enze wins!"}]")
     st.subheader("**1) Enze - 3 Championships**")
     st.subheader("**2) Daniel - 1 Championship**")
