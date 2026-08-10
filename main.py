@@ -1299,7 +1299,7 @@ elif option == "Save 2 Results":
     st.write("*WAITING*")
     st.write("**Finals**")
     st.write("*WAITING*")
-    st.write("**FMVP: Michael Jordan**")
+    st.write("**FMVP: ???**")
 
 elif option == "Rankings":
     st.title("*RANKINGS*")
