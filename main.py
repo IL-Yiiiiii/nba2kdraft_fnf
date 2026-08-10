@@ -497,7 +497,7 @@ if not shared_draft.get("initialized", False):
     # Flip the master switch
     shared_draft["initialized"] = True
 # --------------------------------------
-option = st.sidebar.selectbox("Menu", ["Start", "Save 1 Results", "Save 2 Results", "Rankings", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub"])
+option = st.sidebar.selectbox("Menu", ["Start", "Rankings", "Save 1 Results", "Save 2 Results", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub"])
 if shared_draft["draft_mode"]:
     username = st.session_state.get("username", "Guest")
 
