@@ -497,7 +497,7 @@ if not shared_draft.get("initialized", False):
     # Flip the master switch
     shared_draft["initialized"] = True
 # --------------------------------------
-option = st.sidebar.selectbox("Menu", ["Start", "Results", "Rankings", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub"])
+option = st.sidebar.selectbox("Menu", ["Start", "Save 1 Results", "Save 2 Results", "Rankings", "Guide", "Headliner Players", "Search Players", "Compare Players", "Draft Room", "Teams", "Trade Hub"])
 if shared_draft["draft_mode"]:
     username = st.session_state.get("username", "Guest")
 
@@ -1225,8 +1225,8 @@ elif option == "Trade Hub":
                             if p:
                                 st.write(f"- {p.name}")
 
-elif option == "Results":
-    st.title("*RESULTS*")
+elif option == "Save 1 Results":
+    st.title("*SAVE 1 RESULTS*")
     st.divider()
     st.subheader("**< YEAR 1 >**")
     st.write("**MVP: Shaquille O'Neal**")
@@ -1284,14 +1284,22 @@ elif option == "Results":
     st.write("**[1]** *Enze* (4-0) *Zach* **[7]**")
     st.write("**FMVP: Shaquille O'Neal**")
     st.divider()
-    st.subheader("**< YEAR 5 >**")
-    st.write("*WAITING!*")
+
+elif option == "Save 2 Results":
+    st.title("*SAVE 2 RESULTS*")
     st.divider()
-    st.subheader("**< YEAR 6 >**")
-    st.write("*WAITING!*")
-    st.divider()
-    st.subheader("**< YEAR 7 >**")
-    st.write("*WAITING!*")
+    st.subheader("**< YEAR 1 >**")
+    st.write("**MVP: Shaquille O'Neal**")
+    st.write("**Quarter Finals**")
+    st.write("**[1]** *Enze* (?-?) *Knicks* **[8]**")
+    st.write("**[2]** *Joydeep* (?-?) *Daniel* **[7]**")
+    st.write("**[3]** *Isaac* (?-?) *Joshua* **[6]**")
+    st.write("**[4]** *Zach* (?-?) *Aashutosh* **[5]**")
+    st.write("**Semi Finals**")
+    st.write("*WAITING*")
+    st.write("**Finals**")
+    st.write("*WAITING*")
+    st.write("**FMVP: Michael Jordan**")
 
 elif option == "Rankings":
     st.title("*RANKINGS*")
